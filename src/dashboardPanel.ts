@@ -1,3 +1,4 @@
+import { getLanguage, getMessages, t } from './i18n.js';
 import * as vscode from 'vscode';
 import { randomBytes } from 'node:crypto';
 import type { ProjectActions } from './actions.js';
@@ -34,7 +35,7 @@ export class DashboardPanel implements vscode.Disposable {
         }
         this.panel = vscode.window.createWebviewPanel(
             'clientProjectDashboard.panel',
-            '客户项目仪表盘',
+            t("Client Project Dashboard"),
             vscode.ViewColumn.Active,
             {
                 enableScripts: true,
@@ -176,7 +177,7 @@ function readRef(record: Record<string, unknown>): NodeRef | undefined {
     return { type: record.nodeType, id: record.id };
 }
 
-function dashboardHtml(webview: vscode.Webview, extensionUri: vscode.Uri): string {
+export function dashboardHtml(webview: vscode.Webview, extensionUri: vscode.Uri): string {
     const nonce = createNonce();
     const css = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'media', 'dashboard.css'));
     const script = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'media', 'dashboard.js'));
@@ -187,13 +188,13 @@ function dashboardHtml(webview: vscode.Webview, extensionUri: vscode.Uri): strin
         `img-src ${webview.cspSource} data:`,
     ].join('; ');
     return `<!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="${getLanguage()}" data-messages="${escapeHtml(JSON.stringify(getMessages()))}">
 <head>
 	<meta charset="UTF-8">
 	<meta http-equiv="Content-Security-Policy" content="${csp}">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="${css}">
-	<title>客户项目仪表盘</title>
+	<title>${escapeHtml(t("Client Project Dashboard"))}</title>
 </head>
 <body>
 	<div class="app">
@@ -207,26 +208,26 @@ function dashboardHtml(webview: vscode.Webview, extensionUri: vscode.Uri): strin
 							<rect x="8.75" y="7.25" width="6.25" height="7.75" rx="0.5"></rect>
 						</svg>
 					</span>
-					<h1>仪表盘</h1>
-					<p class="brand-path">客户<span class="slash" aria-hidden="true">/</span>项目<span class="slash" aria-hidden="true">/</span>目录</p>
+					<h1>${escapeHtml(t("Dashboard"))}</h1>
+					<p class="brand-path">${escapeHtml(t("Client"))}<span class="slash" aria-hidden="true">/</span>${escapeHtml(t("Project"))}<span class="slash" aria-hidden="true">/</span>${escapeHtml(t("Folder"))}</p>
 				</div>
 				<div class="search-field">
 					<svg class="search-icon" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
 						<circle cx="7" cy="7" r="4.25" fill="none" stroke="currentColor" stroke-width="1.4"></circle>
 						<path fill="none" stroke="currentColor" stroke-width="1.4" d="M10.2 10.2 13 13"></path>
 					</svg>
-					<input id="search" type="search" placeholder="搜索客户、项目或目录" aria-label="搜索" title="Ctrl+F 聚焦搜索">
+					<input id="search" type="search" placeholder="${escapeHtml(t("Search clients, projects, or folders"))}" aria-label="${escapeHtml(t("Search"))}" title="${escapeHtml(t("Ctrl/Cmd+F to focus search"))}">
 				</div>
 			</div>
-			<div id="metrics" class="metrics" aria-label="分组统计"></div>
+			<div id="metrics" class="metrics" aria-label="${escapeHtml(t("Catalog statistics"))}"></div>
 		</header>
 		<div class="shell" id="stage">
 			<div class="stage-tools">
-				<div id="filters" class="filters" role="toolbar" aria-label="按类型筛选"></div>
+				<div id="filters" class="filters" role="toolbar" aria-label="${escapeHtml(t("Filter by type"))}"></div>
                 <div class="fold-actions">
-                    <button type="button" class="text-action" data-action="add-client">添加客户</button>
-                    <button type="button" class="text-action" data-action="import">导入</button>
-                    <button type="button" class="text-action" data-action="export">备份</button>
+                    <button type="button" class="text-action" data-action="add-client">${escapeHtml(t("Add client"))}</button>
+                    <button type="button" class="text-action" data-action="import">${escapeHtml(t("Import"))}</button>
+                    <button type="button" class="text-action" data-action="export">${escapeHtml(t("Back up"))}</button>
                 </div>
 			</div>
 			<div id="list" class="stage-body"></div>
@@ -239,4 +240,10 @@ function dashboardHtml(webview: vscode.Webview, extensionUri: vscode.Uri): strin
 
 function createNonce(): string {
     return randomBytes(24).toString('base64');
+}
+
+function escapeHtml(value: string): string {
+    return value.replace(/[&<>"']/g, character => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+    })[character]!);
 }

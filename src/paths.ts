@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 import { existsSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import type { ModuleKind } from './types.js';
@@ -49,7 +50,7 @@ export function guessKind(name: string): ModuleKind {
 
 export function uniqueName(existing: readonly string[], desired: string): string {
     const names = new Set(existing.map(name => name.trim().toLowerCase()));
-    const base = desired.trim() || '未命名';
+    const base = desired.trim() || t("Untitled");
     if (!names.has(base.toLowerCase())) {
         return base;
     }

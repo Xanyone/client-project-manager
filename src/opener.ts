@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 import { normalize } from 'node:path';
 import { createHash, randomUUID } from 'node:crypto';
 import * as vscode from 'vscode';
@@ -43,7 +44,7 @@ export async function openFolders(
 ): Promise<void> {
     const available = folders.filter(folder => folder.location);
     if (available.length === 0) {
-        throw new Error('没有可打开的目录');
+        throw new Error(t("No folders to open"));
     }
 
     await forgetGeneratedWorkspaces(context);

@@ -1,5 +1,7 @@
 # 客户项目仪表盘
 
+[English](README.en.md)
+
 按 **客户 → 项目 → 模块** 管理本地目录，并从仪表盘或侧边栏快速打开。
 
 ## 安装
@@ -21,7 +23,9 @@ A客户
 
 ## 功能
 
-- 侧边栏树：客户、项目、模块三级
+- 默认启动时打开仪表盘，分组侧栏按需启用
+- 中英文界面跟随 VS Code 的显示语言，其他语言回退英文；中文环境使用简体中文
+- 可选侧边栏树：客户、项目、模块三级
 - 仪表盘：折叠查看客户、项目和目录，可搜索、按模块类型筛选，也可只看路径缺失的目录
 - 模块就是项目下的目录，类型由客户自定义输入，仪表盘会按已使用的类型筛选
 - 在当前窗口或新窗口打开；按住 `Ctrl` / `Cmd` 使用相反行为
@@ -32,7 +36,9 @@ A客户
 
 ## 运行
 
-用 VS Code 打开本目录，按 `F5`。扩展开发主机里会出现「客户项目」活动栏图标。
+用 VS Code 打开本目录，按 `F5`。扩展开发主机会自动打开仪表盘。
+
+默认仅显示仪表盘入口。如需分组树，在设置中启用 `clientProjectDashboard.showSidebar`，即可显示「客户项目」活动栏图标。将 `clientProjectDashboard.openOnStartup` 设为 `never` 可关闭自动打开；已有显式设置会保留。
 
 也可以：
 
@@ -66,7 +72,8 @@ A客户
 
 | 设置 | 默认 | 作用 |
 | --- | --- | --- |
-| `clientProjectDashboard.openOnStartup` | `never` | `never` / `emptyWindow` / `always` |
+| `clientProjectDashboard.openOnStartup` | `always` | `never` / `emptyWindow` / `always` |
+| `clientProjectDashboard.showSidebar` | `false` | 按需显示客户项目分组侧栏 |
 | `clientProjectDashboard.openInNewWindow` | `false` | 单击是否新开窗口 |
 | `clientProjectDashboard.showPath` | `true` | 目录卡片上是否显示路径末段 |
 | `clientProjectDashboard.storage` | `globalState` | 改为 `settings` 后写入用户设置 |
@@ -81,7 +88,8 @@ npm run watch
 
 `npm test` 会启动 VS Code 测试宿主。分组逻辑的单测在 `src/test/catalog.test.ts`。
 
+扩展清单文案使用 `package.nls.json`（英文）和 `package.nls.zh*.json`（简体中文）；运行时文案通过 `src/i18n.ts` 共用 `src/locales/zh-cn.json`。新增文案使用英文原文作为键，并补充中文译文和完整占位符。用户输入的名称、类型、路径和说明不参与翻译。
+
 发布前把 `package.json` 里的 `publisher` 改成你的 Marketplace 发布者 ID。
 
 运行 `npm run package:vsix` 生成可安装扩展包。推送 `v*` 标签时，GitHub Actions 会运行完整测试并发布带 VSIX 的 GitHub Release。Marketplace 发布需要单独注册并验证发布者，GitHub Release 不依赖 Marketplace 凭据。
-# project-dashboard

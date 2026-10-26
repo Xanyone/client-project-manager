@@ -1,3 +1,4 @@
+import { countMessage, t } from './i18n.js';
 import * as vscode from 'vscode';
 import type { ProjectActions } from './actions.js';
 import { findNode, parentOf } from './catalog.js';
@@ -69,7 +70,7 @@ export class ProjectTreeProvider implements vscode.TreeDataProvider<ProjectTreeI
         const dragged = await readDraggedRef(dataTransfer);
         if (dragged) {
             if (!target) {
-                void vscode.window.showWarningMessage('请拖到另一个客户、项目或模块上。');
+                void vscode.window.showWarningMessage(t("Drop onto another client, project, or module."));
                 return;
             }
             await this.actions.moveByDrop(dragged, target.ref);
@@ -86,18 +87,18 @@ export class ProjectTreeProvider implements vscode.TreeDataProvider<ProjectTreeI
         if (located?.type === 'client') {
             const item = new ProjectTreeItem(ref, located.client.name, vscode.TreeItemCollapsibleState.Expanded);
             item.iconPath = new vscode.ThemeIcon('organization');
-            item.description = located.client.description ?? `${located.client.projects.length} 个项目`;
-            item.tooltip = tooltip(located.client.name, located.client.description, `${located.client.projects.length} 个项目`);
+            item.description = located.client.description ?? countMessage("{0} project", "{0} projects", located.client.projects.length);
+            item.tooltip = tooltip(located.client.name, located.client.description, countMessage("{0} project", "{0} projects", located.client.projects.length));
             return item;
         }
         if (located?.type === 'project') {
             const item = new ProjectTreeItem(ref, located.project.name, vscode.TreeItemCollapsibleState.Expanded);
             item.iconPath = new vscode.ThemeIcon('repo');
-            item.description = located.project.description ?? `${located.project.modules.length} 个模块`;
+            item.description = located.project.description ?? countMessage("{0} module", "{0} modules", located.project.modules.length);
             item.tooltip = tooltip(
                 `${located.client.name} / ${located.project.name}`,
                 located.project.description,
-                `${located.project.modules.length} 个模块`,
+                countMessage("{0} module", "{0} modules", located.project.modules.length),
             );
             return item;
         }
@@ -107,7 +108,7 @@ export class ProjectTreeProvider implements vscode.TreeDataProvider<ProjectTreeI
             const inspected = inspectPath(located.module.path);
             item.description = inspected.exists
                 ? located.module.kind
-                : `${located.module.kind} · 路径不存在`;
+                : t("{0} · Path does not exist", located.module.kind);
             item.tooltip = tooltip(
                 located.module.name,
                 `${located.module.kind}${inspected.git ? ' · Git' : ''}`,
@@ -115,12 +116,12 @@ export class ProjectTreeProvider implements vscode.TreeDataProvider<ProjectTreeI
             );
             item.command = {
                 command: 'clientProjectDashboard.open',
-                title: '打开',
+                title: t("Open"),
                 arguments: [ref],
             };
             return item;
         }
-        return new ProjectTreeItem(ref, '未知项', vscode.TreeItemCollapsibleState.None);
+        return new ProjectTreeItem(ref, t("Unknown item"), vscode.TreeItemCollapsibleState.None);
     }
 }
 
@@ -136,7 +137,7 @@ async function readDraggedRef(dataTransfer: vscode.DataTransfer): Promise<NodeRe
             return undefined;
         }
         if (parsed.length > 1) {
-            void vscode.window.showWarningMessage('一次只能拖动一项。');
+            void vscode.window.showWarningMessage(t("Drag one item at a time."));
             return undefined;
         }
         return parsed[0];

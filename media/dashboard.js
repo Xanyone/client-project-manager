@@ -1,4 +1,18 @@
 (function () {
+    const messages = JSON.parse(document.documentElement.dataset.messages || '{}');
+    function t(message, ...args) {
+        const text = Object.prototype.hasOwnProperty.call(messages, message) ? messages[message] : message;
+        return text.replace(/\{(\d+)\}/g, function (match, index) {
+            return args[index] === undefined ? match : String(args[index]);
+        });
+    }
+
+    const locale = document.documentElement.lang || 'en';
+    const numbers = new Intl.NumberFormat(locale);
+    const plurals = new Intl.PluralRules(locale);
+    function countMessage(singular, plural, count) {
+        return t(plurals.select(count) === 'one' ? singular : plural, numbers.format(count));
+    }
     const vscode = acquireVsCodeApi();
     const previous = vscode.getState() || {};
     let model = previous.model || { clients: [], kinds: [], openInNewWindow: false, showPath: true };
@@ -69,14 +83,14 @@
     }
 
     function renderMetrics(total) {
-        const missing = metric(total.missing, '缺失');
+        const missing = metric(total.missing, t("Missing"));
         if (total.missing > 0) {
             missing.classList.add('has-missing');
         }
         metrics.replaceChildren(
-            metric(total.clients, '客户'),
-            metric(total.projects, '项目'),
-            metric(total.modules, '目录'),
+            metric(total.clients, t("Client")),
+            metric(total.projects, t("Project")),
+            metric(total.modules, t("Folder")),
             missing,
         );
     }
@@ -89,7 +103,7 @@
                 filters.append(chip);
             }
         });
-        const missing = actionButton('只看缺失', missingOnly ? 'chip active' : 'chip', 'filter-missing', '', '');
+        const missing = actionButton(t("Missing only"), missingOnly ? 'chip active' : 'chip', 'filter-missing', '', '');
         missing.setAttribute('aria-pressed', String(missingOnly));
         filters.append(missing);
     }
@@ -117,19 +131,19 @@
         const section = el('section', open ? 'fold-card client-card open' : 'fold-card client-card');
         section.style.setProperty('--tone', safeColor(client.color));
         const line = el('div', 'fold-head');
-        const toggle = foldToggle('client', client.id, open, client.description || (client.projects.length + ' 个项目'));
+        const toggle = foldToggle('client', client.id, open, client.description || (countMessage("{0} project", "{0} projects", client.projects.length)));
         toggle.append(
             chevron(),
             clientIcon(),
             el('span', 'client-name', client.name),
-            roleTag('客户'),
-            el('span', 'client-meta', client.projects.length + ' 个项目'),
+            roleTag(t("Client")),
+            el('span', 'client-meta', countMessage("{0} project", "{0} projects", client.projects.length)),
         );
         const actions = el('div', 'fold-actions');
         if (!isFiltering()) {
-            actions.append(actionButton('添加项目', 'text-action', 'add-project', client.id, 'client'));
+            actions.append(actionButton(t("Add project"), 'text-action', 'add-project', client.id, 'client'));
         }
-        actions.append(menuButton('编辑客户', 'edit', client.id, 'client'));
+        actions.append(menuButton(t("Edit client"), 'edit', client.id, 'client'));
         line.append(toggle, actions);
         section.append(line);
         if (!open) {
@@ -137,7 +151,7 @@
         }
         const projects = el('div', 'fold-body');
         if (client.projects.length === 0) {
-            projects.append(el('p', 'project-empty', '还没有项目'));
+            projects.append(el('p', 'project-empty', t("No projects yet")));
         } else {
             client.projects.forEach(function (project) {
                 projects.append(renderProject(project));
@@ -153,25 +167,25 @@
         block.style.setProperty('--tone', safeColor(project.color));
         const line = el('div', 'fold-head');
         const toggle = foldToggle('project', project.id, open, project.description || project.name);
-        toggle.append(chevron(), projectIcon(), el('span', 'project-name', project.name), roleTag('项目'));
+        toggle.append(chevron(), projectIcon(), el('span', 'project-name', project.name), roleTag(t("Project")));
         if (project.description) {
             toggle.append(el('span', 'project-description', project.description));
         }
         const missing = project.modules.filter(function (module) { return !module.exists; }).length;
         if (missing > 0) {
             const dot = el('span', 'alert-dot');
-            dot.title = missing + ' 个路径缺失';
+            dot.title = countMessage("{0} missing path", "{0} missing paths", missing);
             dot.setAttribute('role', 'img');
             dot.setAttribute('aria-label', dot.title);
             toggle.append(dot);
         }
         const actions = el('div', 'fold-actions');
         actions.append(
-            el('span', 'project-count', project.modules.length + ' 个目录'),
-            actionButton('打开项目', 'text-action', 'open', project.id, 'project'),
-            actionButton('选择窗口', 'text-action', 'workspace', project.id, 'project'),
-            actionButton('添加目录', 'text-action', 'add-module', project.id, 'project'),
-            menuButton('编辑项目', 'edit', project.id, 'project'),
+            el('span', 'project-count', countMessage("{0} folder", "{0} folders", project.modules.length)),
+            actionButton(t("Open project"), 'text-action', 'open', project.id, 'project'),
+            actionButton(t("Choose window"), 'text-action', 'workspace', project.id, 'project'),
+            actionButton(t("Add folder"), 'text-action', 'add-module', project.id, 'project'),
+            menuButton(t("Edit project"), 'edit', project.id, 'project'),
         );
         line.append(toggle, actions);
         block.append(line);
@@ -180,7 +194,7 @@
         }
         const board = el('div', 'fold-body module-board');
         if (project.modules.length === 0) {
-            board.append(el('p', 'module-empty', '还没有目录'));
+            board.append(el('p', 'module-empty', t("No folders yet")));
         } else {
             project.modules.forEach(function (module) {
                 board.append(renderModule(module));
@@ -209,24 +223,24 @@
         open.dataset.action = 'open';
         open.dataset.id = module.id;
         open.dataset.nodeType = 'module';
-        open.title = module.exists ? module.path : '路径不存在：' + module.path;
+        open.title = module.exists ? module.path : t("Path does not exist: {0}", module.path);
         const heading = el('span', 'module-heading');
         heading.append(el('span', 'module-name', module.name));
         const tags = el('span', 'module-tags');
         const kind = el('span', 'module-kind');
-        kind.append(tick(module.color), document.createTextNode(module.kindLabel || '目录'));
-        tags.append(kind, roleTag('模块'), roleTag('目录'));
+        kind.append(tick(module.color), document.createTextNode(module.kindLabel || t("Folder")));
+        tags.append(kind, roleTag(t("Module")), roleTag(t("Folder")));
         if (module.git) {
             tags.append(el('span', 'tag', 'Git'));
         }
         if (!module.exists) {
-            tags.append(el('span', 'tag warn', '缺失'));
+            tags.append(el('span', 'tag warn', t("Missing")));
         }
         open.append(heading, tags);
         if (model.showPath) {
             open.append(el('span', 'module-path', module.path || ''));
         }
-        card.append(open, menuButton('编辑目录', 'edit', module.id, 'module'));
+        card.append(open, menuButton(t("Edit folder"), 'edit', module.id, 'module'));
         return card;
     }
 
@@ -344,7 +358,7 @@
             const total = Object.keys(counts).reduce(function (sum, key) {
                 return sum + counts[key];
             }, 0);
-            button.append(document.createTextNode('全部'), el('span', 'chip-count', String(total)));
+            button.append(document.createTextNode(t("All")), el('span', 'chip-count', numbers.format(total)));
             return button;
         }
         const countForKind = counts[kind.id] || 0;
@@ -353,29 +367,29 @@
         }
         const swatch = el('span', 'swatch');
         swatch.style.background = safeColor(kind.color);
-        button.append(swatch, document.createTextNode(kind.label), el('span', 'chip-count', String(countForKind)));
+        button.append(swatch, document.createTextNode(kind.label), el('span', 'chip-count', numbers.format(countForKind)));
         return button;
     }
 
     function metric(value, label) {
         const node = el('span', 'metric');
-        node.append(el('span', 'metric-label', label), el('strong', null, String(value)));
+        node.append(el('span', 'metric-label', label), el('strong', null, numbers.format(value)));
         return node;
     }
 
     function emptyState() {
         const box = el('div', 'empty');
-        box.append(el('h2', null, '从添加客户开始'));
-        box.append(el('p', null, '先添加客户，再添加项目，然后把目录放进项目卡片。'));
-        box.append(actionButton('添加客户', 'primary', 'add-client', '', ''));
+        box.append(el('h2', null, t("Start by adding a client")));
+        box.append(el('p', null, t("Add a client, create a project, then add folders to the project.")));
+        box.append(actionButton(t("Add client"), 'primary', 'add-client', '', ''));
         return box;
     }
 
     function noMatch() {
         const box = el('div', 'no-match');
-        box.append(el('h2', null, '没有匹配结果'));
-        box.append(el('p', null, '换个关键词，或清空搜索。'));
-        const clear = el('button', 'ghost', '清空搜索');
+        box.append(el('h2', null, t("No results found")));
+        box.append(el('p', null, t("Try another keyword or clear the search.")));
+        const clear = el('button', 'ghost', t("Clear search"));
         clear.type = 'button';
         clear.dataset.action = 'clear-query';
         box.append(clear);
@@ -384,9 +398,9 @@
 
     function filterEmpty() {
         const box = el('div', 'filter-empty');
-        box.append(el('h2', null, '没有符合筛选的目录'));
-        box.append(el('p', null, '换一个类型，或清除筛选。'));
-        const clear = el('button', 'ghost', '清除筛选');
+        box.append(el('h2', null, t("No folders match the filters")));
+        box.append(el('p', null, t("Choose another type or clear the filters.")));
+        const clear = el('button', 'ghost', t("Clear filters"));
         clear.type = 'button';
         clear.dataset.action = 'clear-filters';
         box.append(clear);
@@ -564,7 +578,7 @@
     }
 
     function kindCounts(clients) {
-        const counts = {};
+        const counts = Object.create(null);
         clients.forEach(function (client) {
             client.projects.forEach(function (project) {
                 project.modules.forEach(function (module) {
@@ -584,7 +598,7 @@
         (current.clients || []).forEach(function (client) {
             (client.projects || []).forEach(function (project) {
                 (project.modules || []).forEach(function (module) {
-                    const id = module.kind || module.kindLabel || '其他';
+                    const id = module.kind || module.kindLabel || t("Other");
                     if (!seen.has(id)) {
                         seen.add(id);
                         kinds.push({ id: id, label: module.kindLabel || id, color: module.color || '#8b9bb4' });

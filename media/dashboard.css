@@ -279,8 +279,10 @@ button.ghost:hover {
 
 .stage-tools {
     display: flex;
+    flex-wrap: wrap;
     flex: none;
     align-items: center;
+    gap: 6px 12px;
     width: 100%;
     min-height: 40px;
     padding: 6px 12px;
@@ -294,9 +296,10 @@ button.ghost:hover {
 
 .filters {
     display: flex;
+    flex: 1 1 240px;
     flex-wrap: wrap;
     gap: 4px;
-    width: 100%;
+    width: auto;
     min-width: 0;
 }
 
@@ -424,9 +427,12 @@ button.ghost:hover {
 
 .fold-actions {
     display: flex;
+    flex-wrap: wrap;
     flex: none;
     align-items: center;
     gap: 2px;
+    min-width: 0;
+    max-width: 100%;
     margin-left: auto;
 }
 
@@ -773,6 +779,12 @@ button.ghost:hover {
 
     .fold-actions {
         margin-left: 28px;
+        max-width: calc(100% - 28px);
+    }
+
+    .stage-tools > .fold-actions {
+        margin-left: 0;
+        max-width: 100%;
     }
 
     .project-name {

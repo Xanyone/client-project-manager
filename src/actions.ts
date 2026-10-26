@@ -1,3 +1,4 @@
+import { countMessage, t } from './i18n.js';
 import { basename } from 'node:path';
 import * as vscode from 'vscode';
 import {
@@ -32,23 +33,23 @@ import {
 export class ProjectActions {
     async exportCatalog(): Promise<void> {
         const uri = await vscode.window.showSaveDialog({
-            title: '备份分组数据', filters: { JSON: ['json'] },
+            title: t("Back up catalog"), filters: { JSON: ['json'] },
             defaultUri: vscode.Uri.file('project-dashboard-backup.json'),
         });
         if (!uri) { return; }
         await vscode.workspace.fs.writeFile(uri, Buffer.from(JSON.stringify(this.store.get(), null, 2), 'utf8'));
-        void vscode.window.showInformationMessage('分组数据已导出');
+        void vscode.window.showInformationMessage(t("Catalog exported"));
     }
 
     async importCatalog(): Promise<void> {
         const uris = await vscode.window.showOpenDialog({
-            title: '导入分组数据', filters: { JSON: ['json'] }, canSelectMany: false, canSelectFiles: true, canSelectFolders: false,
+            title: t("Import catalog"), filters: { JSON: ['json'] }, canSelectMany: false, canSelectFiles: true, canSelectFolders: false,
         });
         if (!uris?.[0]) { return; }
         const bytes = await vscode.workspace.fs.readFile(uris[0]);
         const incoming = parseCatalog(JSON.parse(Buffer.from(bytes).toString('utf8').replace(/^\uFEFF/, '')));
         if (await this.store.update(current => mergeCatalog(current, incoming))) {
-            void vscode.window.showInformationMessage('分组数据已合并导入');
+            void vscode.window.showInformationMessage(t("Catalog imported and merged"));
         }
     }
 
@@ -58,7 +59,7 @@ export class ProjectActions {
     ) {}
 
     async addClient(): Promise<string | undefined> {
-        const name = await askText('客户名称', '例如：A客户');
+        const name = await askText(t("Client name"), t("For example: Client A"));
         if (!name) {
             return undefined;
         }
@@ -72,7 +73,7 @@ export class ProjectActions {
         if (!await this.store.update(created.catalog)) {
             return undefined;
         }
-        void vscode.window.showInformationMessage(`已添加客户「${created.client.name}」`);
+        void vscode.window.showInformationMessage(t("Added client \"{0}\"", created.client.name));
         return created.client.id;
     }
 
@@ -81,7 +82,7 @@ export class ProjectActions {
         if (!resolvedClientId) {
             return;
         }
-        const name = await askText('项目名称', '例如：B项目');
+        const name = await askText(t("Project name"), t("For example: Project B"));
         if (!name) {
             return;
         }
@@ -95,7 +96,7 @@ export class ProjectActions {
         if (!await this.store.update(created.catalog)) {
             return;
         }
-        void vscode.window.showInformationMessage(`已添加项目「${created.project.name}」`);
+        void vscode.window.showInformationMessage(t("Added project \"{0}\"", created.project.name));
     }
 
     async addModule(projectId?: string): Promise<void> {
@@ -104,8 +105,8 @@ export class ProjectActions {
             return;
         }
         const uris = await vscode.window.showOpenDialog({
-            title: '选择一个模块目录',
-            openLabel: '添加',
+            title: t("Select a module folder"),
+            openLabel: t("Add"),
             canSelectFolders: true,
             canSelectFiles: false,
             canSelectMany: false,
@@ -133,11 +134,11 @@ export class ProjectActions {
             }
         }
         if (folders.length === 0) {
-            void vscode.window.showWarningMessage('请拖入一个本地文件夹。');
+            void vscode.window.showWarningMessage(t("Drag a local folder here."));
             return;
         }
         if (folders.length > 1) {
-            void vscode.window.showWarningMessage('一次只能添加一个目录。');
+            void vscode.window.showWarningMessage(t("Add one folder at a time."));
             return;
         }
         const projectId = await this.projectIdForDrop(target, folders[0]);
@@ -153,7 +154,7 @@ export class ProjectActions {
             return;
         }
         const current = nodeLabel(this.store.get(), resolved);
-        const name = await askText('重命名', undefined, current);
+        const name = await askText(t("Rename"), undefined, current);
         if (!name || name === current) {
             return;
         }
@@ -170,18 +171,18 @@ export class ProjectActions {
         }
         const picked = await vscode.window.showQuickPick(
             [
-                ...COLOR_PRESETS.map(preset => ({ label: preset.label, description: preset.hex, color: preset.hex })),
-                { label: '自定义颜色', description: '#RRGGBB', color: '__custom__' },
-                { label: '使用默认颜色', description: '清除自定义颜色', color: '' },
+                ...COLOR_PRESETS.map(preset => ({ label: t(preset.label), description: preset.hex, color: preset.hex })),
+                { label: t("Custom color"), description: '#RRGGBB', color: '__custom__' },
+                { label: t("Use default color"), description: t("Clear custom color"), color: '' },
             ],
-            { placeHolder: '选择颜色' },
+            { placeHolder: t("Choose a color") },
         );
         if (!picked) {
             return;
         }
         let color: string | undefined;
         if (picked.color === '__custom__') {
-            const custom = await askText('十六进制颜色', '#4C8DFF');
+            const custom = await askText(t("Hex color"), '#4C8DFF');
             if (!custom) {
                 return;
             }
@@ -199,7 +200,7 @@ export class ProjectActions {
         }
         const located = findNode(this.store.get(), resolved);
         const kind = located?.type === 'module'
-            ? await askText('目录类型', '请输入自定义类型', located.module.kind)
+            ? await askText(t("Folder type"), t("Enter a custom type"), located.module.kind)
             : undefined;
         if (!kind) {
             return;
@@ -214,7 +215,7 @@ export class ProjectActions {
         }
         const located = findNode(this.store.get(), resolved);
         const current = located?.type === 'module' ? located.module.path : undefined;
-        const folder = await this.pickFolder('选择新的模块目录', current);
+        const folder = await this.pickFolder(t("Select a new module folder"), current);
         if (!folder) {
             return;
         }
@@ -235,7 +236,7 @@ export class ProjectActions {
                     : located.module.description
             : undefined;
         const description = await vscode.window.showInputBox({
-            prompt: '说明，留空则清除',
+            prompt: t("Description (leave blank to clear)"),
             value: current ?? '',
         });
         if (description === undefined) {
@@ -250,23 +251,23 @@ export class ProjectActions {
             return;
         }
         const items = [
-            { label: '重命名', action: 'rename' },
-            { label: '设置颜色', action: 'color' },
-            { label: '设置说明', action: 'description' },
-            { label: '上移', action: 'up' },
-            { label: '下移', action: 'down' },
+            { label: t("Rename"), action: 'rename' },
+            { label: t("Set color"), action: 'color' },
+            { label: t("Set description"), action: 'description' },
+            { label: t("Move up"), action: 'up' },
+            { label: t("Move down"), action: 'down' },
         ];
         if (resolved.type === 'module') {
-            items.splice(1, 0, { label: '设置路径', action: 'path' }, { label: '设置类型', action: 'kind' });
-            items.push({ label: '复制路径', action: 'copy' }, { label: '在文件管理器中显示', action: 'reveal' });
+            items.splice(1, 0, { label: t("Set path"), action: 'path' }, { label: t("Set type"), action: 'kind' });
+            items.push({ label: t("Copy path"), action: 'copy' }, { label: t("Reveal in file manager"), action: 'reveal' });
         } else if (resolved.type === 'project') {
-            items.splice(3, 0, { label: '添加模块', action: 'module' });
-            items.push({ label: '以工作区打开', action: 'workspace' });
+            items.splice(3, 0, { label: t("Add module"), action: 'module' });
+            items.push({ label: t("Open as workspace"), action: 'workspace' });
         } else {
-            items.push({ label: '添加项目', action: 'project' }, { label: '以工作区打开', action: 'workspace' });
+            items.push({ label: t("Add project"), action: 'project' }, { label: t("Open as workspace"), action: 'workspace' });
         }
-        items.push({ label: '删除', action: 'remove' });
-        const picked = await vscode.window.showQuickPick(items, { placeHolder: '选择操作' });
+        items.push({ label: t("Delete"), action: 'remove' });
+        const picked = await vscode.window.showQuickPick(items, { placeHolder: t("Choose an action") });
         if (!picked) {
             return;
         }
@@ -304,11 +305,11 @@ export class ProjectActions {
         }
         const name = nodeLabel(this.store.get(), resolved);
         const choice = await vscode.window.showWarningMessage(
-            `删除「${name}」？其下的项目和模块也会一并删除。`,
+            t("Delete \"{0}\" and all its projects and modules?", name),
             { modal: true },
-            '删除',
+            t("Delete"),
         );
-        if (choice !== '删除') {
+        if (choice !== t("Delete")) {
             return;
         }
         await this.store.update(current => removeNode(current, resolved));
@@ -325,15 +326,15 @@ export class ProjectActions {
         }
         if (isFilePath(located.module.path) && !inspectPath(located.module.path).exists) {
             const choice = await vscode.window.showWarningMessage(
-                `路径不存在：${located.module.path}`,
-                '仍然打开',
-                '修改路径',
+                t("Path does not exist: {0}", located.module.path),
+                t("Open anyway"),
+                t("Change path"),
             );
-            if (choice === '修改路径') {
+            if (choice === t("Change path")) {
                 await this.setPath(resolved);
                 return;
             }
-            if (choice !== '仍然打开') {
+            if (choice !== t("Open anyway")) {
                 return;
             }
         }
@@ -355,7 +356,7 @@ export class ProjectActions {
         }
         const folders = collectFolders(this.store.get(), resolved);
         if (folders.length === 0) {
-            void vscode.window.showWarningMessage('这个项目下还没有可打开的目录。');
+            void vscode.window.showWarningMessage(t("This project has no folders to open yet."));
             return;
         }
         const preferNew = vscode.workspace.getConfiguration(CONFIG_SECTION).get<boolean>('openInNewWindow', false);
@@ -367,10 +368,10 @@ export class ProjectActions {
         } else {
             const picked = await vscode.window.showQuickPick(
                 [
-                    { label: '新窗口', description: `${folders.length} 个目录`, newWindow: true },
-                    { label: '当前窗口', description: `${folders.length} 个目录`, newWindow: false },
+                    { label: t("New window"), description: countMessage("{0} folder", "{0} folders", folders.length), newWindow: true },
+                    { label: t("Current window"), description: countMessage("{0} folder", "{0} folders", folders.length), newWindow: false },
                 ],
-                { placeHolder: `打开「${nodeLabel(this.store.get(), resolved)}」` },
+                { placeHolder: t("Open \"{0}\"", nodeLabel(this.store.get(), resolved)) },
             );
             if (!picked) {
                 return;
@@ -394,7 +395,7 @@ export class ProjectActions {
             return;
         }
         await vscode.env.clipboard.writeText(located.module.path);
-        void vscode.window.showInformationMessage('已复制路径');
+        void vscode.window.showInformationMessage(t("Path copied"));
     }
 
     async move(ref: NodeRef | undefined, direction: 'up' | 'down'): Promise<void> {
@@ -408,18 +409,18 @@ export class ProjectActions {
     async moveByDrop(source: NodeRef, target: NodeRef): Promise<void> {
         const result = relocate(this.store.get(), source, target);
         if (!result.moved) {
-            void vscode.window.showWarningMessage('不能放到这里。客户只能调整顺序，项目可拖到客户或其他项目，模块可拖到项目或其他模块。');
+            void vscode.window.showWarningMessage(t("Cannot drop here. Reorder clients, move projects to clients or projects, and move modules to projects or modules."));
             return;
         }
         await this.store.update(result.catalog);
     }
 
     private async addOneModule(projectId: string, folder: string): Promise<void> {
-        const name = await askText('目录名称', '请输入名称', basename(folder));
+        const name = await askText(t("Folder name"), t("Enter a name"), basename(folder));
         if (!name) {
             return;
         }
-        const kind = await askText('目录类型', '请输入自定义类型，例如：前端、API、配置');
+        const kind = await askText(t("Folder type"), t("Enter a custom type, such as Frontend, API, or Config"));
         if (!kind) {
             return;
         }
@@ -457,10 +458,10 @@ export class ProjectActions {
         }
         const picked = await vscode.window.showQuickPick(
             [
-                { label: '$(add) 新建项目', id: '__new__' },
+                { label: t("$(add) New project"), id: '__new__' },
                 ...client.projects.map(project => ({ label: project.name, id: project.id })),
             ],
-            { placeHolder: '放到哪个项目？' },
+            { placeHolder: t("Choose a destination project") },
         );
         if (!picked) {
             return undefined;
@@ -472,7 +473,7 @@ export class ProjectActions {
     }
 
     private async createProject(clientId: string, suggestedName: string): Promise<string | undefined> {
-        const name = await askText('项目名称', undefined, suggestedName);
+        const name = await askText(t("Project name"), undefined, suggestedName);
         if (!name) {
             return undefined;
         }
@@ -496,10 +497,10 @@ export class ProjectActions {
         }
         const picked = await vscode.window.showQuickPick(
             [
-                ...(allowCreate ? [{ label: '$(add) 新建客户', id: '__new__' }] : []),
+                ...(allowCreate ? [{ label: t("$(add) New client"), id: '__new__' }] : []),
                 ...clients.map(client => ({ label: client.name, description: client.description, id: client.id })),
             ],
-            { placeHolder: '选择客户' },
+            { placeHolder: t("Choose a client") },
         );
         if (!picked) {
             return undefined;
@@ -514,20 +515,20 @@ export class ProjectActions {
             id: project.id,
         })));
         if (items.length === 0) {
-            const create = await vscode.window.showInformationMessage('还没有项目。', '添加项目');
-            if (create === '添加项目') {
+            const create = await vscode.window.showInformationMessage(t("No projects yet."), t("Add project"));
+            if (create === t("Add project")) {
                 await this.addProject();
             }
             return undefined;
         }
-        const picked = await vscode.window.showQuickPick(items, { placeHolder: '选择项目' });
+        const picked = await vscode.window.showQuickPick(items, { placeHolder: t("Choose a project") });
         return picked?.id;
     }
 
     private async pickFolder(title: string, current?: string): Promise<string | undefined> {
         const uris = await vscode.window.showOpenDialog({
             title,
-            openLabel: '选择文件夹',
+            openLabel: t("Select folder"),
             canSelectFolders: true,
             canSelectFiles: false,
             canSelectMany: false,
@@ -547,7 +548,7 @@ export class ProjectActions {
         const items: Array<vscode.QuickPickItem & { ref: NodeRef }> = [];
         for (const client of this.store.get().clients) {
             if (!expected || expected === 'client') {
-                items.push({ label: client.name, description: '客户', ref: { type: 'client', id: client.id } });
+                items.push({ label: client.name, description: t("Client"), ref: { type: 'client', id: client.id } });
             }
             for (const project of client.projects) {
                 if (!expected || expected === 'project') {
@@ -569,10 +570,10 @@ export class ProjectActions {
             }
         }
         if (items.length === 0) {
-            void vscode.window.showInformationMessage('还没有可选择的分组。');
+            void vscode.window.showInformationMessage(t("No groups available yet."));
             return undefined;
         }
-        const picked = await vscode.window.showQuickPick(items, { placeHolder: '选择一项' });
+        const picked = await vscode.window.showQuickPick(items, { placeHolder: t("Choose an item") });
         return picked?.ref;
     }
 
@@ -589,8 +590,8 @@ export class ProjectActions {
         if (!hasSiblingName(this.store.get(), parent, name, ignoreId)) {
             return false;
         }
-        const choice = await vscode.window.showWarningMessage(`同级已有名为「${name}」的项，仍然继续？`, { modal: true }, '继续');
-        return choice !== '继续';
+        const choice = await vscode.window.showWarningMessage(t("An item named \"{0}\" already exists in this group. Continue?", name), { modal: true }, t("Continue"));
+        return choice !== t("Continue");
     }
 
     private projectCount(clientId: string): number {
@@ -614,7 +615,7 @@ async function askText(prompt: string, placeHolder?: string, value?: string): Pr
         prompt,
         placeHolder,
         value,
-        validateInput: input => input.trim() ? undefined : '不能为空',
+        validateInput: input => input.trim() ? undefined : t("Cannot be empty"),
     });
     return text?.trim();
 }

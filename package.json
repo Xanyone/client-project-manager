@@ -1,8 +1,8 @@
 {
   "name": "client-project-dashboard",
-  "displayName": "客户项目仪表盘",
-  "description": "按客户、项目、模块分组管理目录，并从仪表盘快速打开。",
-  "version": "0.2.1",
+  "displayName": "%extension.displayName%",
+  "description": "%extension.description%",
+  "version": "0.3.0",
   "publisher": "Xanyone",
   "engines": {
     "vscode": "^1.140.0"
@@ -24,7 +24,7 @@
       "activitybar": [
         {
           "id": "clientProjectDashboard",
-          "title": "客户项目",
+          "title": "%views.container.title%",
           "icon": "media/icon.svg"
         }
       ]
@@ -33,136 +33,137 @@
       "clientProjectDashboard": [
         {
           "id": "clientProjectDashboard.explorer",
-          "name": "分组",
-          "icon": "media/icon.svg"
+          "name": "%views.groups.name%",
+          "icon": "media/icon.svg",
+          "when": "config.clientProjectDashboard.showSidebar"
         }
       ]
     },
     "viewsWelcome": [
       {
         "view": "clientProjectDashboard.explorer",
-        "contents": "按客户、项目、模块管理目录。\n[添加客户](command:clientProjectDashboard.addClient)\n[打开仪表盘](command:clientProjectDashboard.openDashboard)"
+        "contents": "%views.welcome%"
       }
     ],
     "commands": [
       {
         "command": "clientProjectDashboard.openDashboard",
-        "title": "打开仪表盘",
-        "category": "客户项目",
+        "title": "%commands.openDashboard.title%",
+        "category": "%commands.category%",
         "icon": "$(dashboard)"
       },
       {
         "command": "clientProjectDashboard.addClient",
-        "title": "添加客户",
-        "category": "客户项目",
+        "title": "%commands.addClient.title%",
+        "category": "%commands.category%",
         "icon": "$(add)"
       },
       {
         "command": "clientProjectDashboard.addProject",
-        "title": "添加项目",
-        "category": "客户项目",
+        "title": "%commands.addProject.title%",
+        "category": "%commands.category%",
         "icon": "$(folder)"
       },
       {
         "command": "clientProjectDashboard.addModule",
-        "title": "添加模块",
-        "category": "客户项目",
+        "title": "%commands.addModule.title%",
+        "category": "%commands.category%",
         "icon": "$(new-folder)"
       },
       {
         "command": "clientProjectDashboard.rename",
-        "title": "重命名",
-        "category": "客户项目",
+        "title": "%commands.rename.title%",
+        "category": "%commands.category%",
         "icon": "$(edit)"
       },
       {
         "command": "clientProjectDashboard.setColor",
-        "title": "设置颜色",
-        "category": "客户项目",
+        "title": "%commands.setColor.title%",
+        "category": "%commands.category%",
         "icon": "$(symbol-color)"
       },
       {
         "command": "clientProjectDashboard.setKind",
-        "title": "设置模块类型",
-        "category": "客户项目"
+        "title": "%commands.setKind.title%",
+        "category": "%commands.category%"
       },
       {
         "command": "clientProjectDashboard.setPath",
-        "title": "设置路径",
-        "category": "客户项目"
+        "title": "%commands.setPath.title%",
+        "category": "%commands.category%"
       },
       {
         "command": "clientProjectDashboard.setDescription",
-        "title": "设置说明",
-        "category": "客户项目"
+        "title": "%commands.setDescription.title%",
+        "category": "%commands.category%"
       },
       {
         "command": "clientProjectDashboard.edit",
-        "title": "编辑",
-        "category": "客户项目",
+        "title": "%commands.edit.title%",
+        "category": "%commands.category%",
         "icon": "$(edit)"
       },
       {
         "command": "clientProjectDashboard.remove",
-        "title": "删除",
-        "category": "客户项目",
+        "title": "%commands.remove.title%",
+        "category": "%commands.category%",
         "icon": "$(trash)"
       },
       {
         "command": "clientProjectDashboard.open",
-        "title": "打开",
-        "category": "客户项目",
+        "title": "%commands.open.title%",
+        "category": "%commands.category%",
         "icon": "$(folder-opened)"
       },
       {
         "command": "clientProjectDashboard.openInNewWindow",
-        "title": "在新窗口打开",
-        "category": "客户项目",
+        "title": "%commands.openInNewWindow.title%",
+        "category": "%commands.category%",
         "icon": "$(window)"
       },
       {
         "command": "clientProjectDashboard.openWorkspace",
-        "title": "以工作区打开",
-        "category": "客户项目"
+        "title": "%commands.openWorkspace.title%",
+        "category": "%commands.category%"
       },
       {
         "command": "clientProjectDashboard.reveal",
-        "title": "在文件管理器中显示",
-        "category": "客户项目"
+        "title": "%commands.reveal.title%",
+        "category": "%commands.category%"
       },
       {
         "command": "clientProjectDashboard.copyPath",
-        "title": "复制路径",
-        "category": "客户项目",
+        "title": "%commands.copyPath.title%",
+        "category": "%commands.category%",
         "icon": "$(copy)"
       },
       {
         "command": "clientProjectDashboard.moveUp",
-        "title": "上移",
-        "category": "客户项目",
+        "title": "%commands.moveUp.title%",
+        "category": "%commands.category%",
         "icon": "$(arrow-up)"
       },
       {
         "command": "clientProjectDashboard.moveDown",
-        "title": "下移",
-        "category": "客户项目",
+        "title": "%commands.moveDown.title%",
+        "category": "%commands.category%",
         "icon": "$(arrow-down)"
       },
       {
         "command": "clientProjectDashboard.refresh",
-        "title": "刷新",
-        "category": "客户项目",
+        "title": "%commands.refresh.title%",
+        "category": "%commands.category%",
         "icon": "$(refresh)"
       },
       {
         "command": "clientProjectDashboard.exportCatalog",
-        "title": "导出分组备份",
-        "category": "客户项目"
+        "title": "%commands.exportCatalog.title%",
+        "category": "%commands.category%"
       },
       {
         "command": "clientProjectDashboard.importCatalog",
-        "title": "导入分组备份",
-        "category": "客户项目"
+        "title": "%commands.importCatalog.title%",
+        "category": "%commands.category%"
       }
     ],
     "menus": {
@@ -274,7 +275,7 @@
       }
     ],
     "configuration": {
-      "title": "客户项目仪表盘",
+      "title": "%configuration.title%",
       "properties": {
         "clientProjectDashboard.openOnStartup": {
           "type": "string",
@@ -284,22 +285,22 @@
             "always"
           ],
           "enumDescriptions": [
-            "不自动打开",
-            "只在没有打开文件夹时打开",
-            "每次启动都打开"
+            "%settings.openOnStartup.never%",
+            "%settings.openOnStartup.emptyWindow%",
+            "%settings.openOnStartup.always%"
           ],
-          "default": "never",
-          "description": "启动时是否打开仪表盘。"
+          "default": "always",
+          "description": "%settings.openOnStartup.description%"
         },
         "clientProjectDashboard.openInNewWindow": {
           "type": "boolean",
           "default": false,
-          "description": "点击模块时在新窗口打开。按住 Ctrl/Cmd 会使用相反的行为。"
+          "description": "%settings.openInNewWindow.description%"
         },
         "clientProjectDashboard.showPath": {
           "type": "boolean",
           "default": true,
-          "description": "在仪表盘目录卡片上显示路径末段。悬停卡片可看完整路径。"
+          "description": "%settings.showPath.description%"
         },
         "clientProjectDashboard.storage": {
           "type": "string",
@@ -308,11 +309,11 @@
             "settings"
           ],
           "enumDescriptions": [
-            "保存在本机扩展存储中",
-            "保存在用户设置中，可随 Settings Sync 同步"
+            "%settings.storage.globalState%",
+            "%settings.storage.settings%"
           ],
           "default": "globalState",
-          "description": "分组数据的保存位置。",
+          "description": "%settings.storage.description%",
           "scope": "application"
         },
         "clientProjectDashboard.catalog": {
@@ -321,7 +322,13 @@
             "null"
           ],
           "default": null,
-          "description": "当存储方式为 settings 时使用的分组数据。一般不用手改。",
+          "description": "%settings.catalog.description%",
+          "scope": "application"
+        },
+        "clientProjectDashboard.showSidebar": {
+          "type": "boolean",
+          "default": false,
+          "description": "%settings.showSidebar.description%",
           "scope": "application"
         }
       }

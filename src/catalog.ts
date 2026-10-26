@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 import { randomUUID } from 'node:crypto';
 import { uniqueName } from './paths.js';
 import {
@@ -33,17 +34,17 @@ export function normalizeColor(value: unknown): string | undefined {
 
 export function parseCatalog(input: unknown): Catalog {
     if (!input || typeof input !== 'object' || Array.isArray(input)) {
-        throw new Error('目录必须是 JSON 对象');
+        throw new Error(t("Catalog must be a JSON object"));
     }
     const record = input as { version?: unknown; clients?: unknown };
     if (record.version !== undefined && record.version !== CATALOG_VERSION) {
-        throw new Error(`不支持的数据版本：${String(record.version)}`);
+        throw new Error(t("Unsupported catalog version: {0}", String(record.version)));
     }
     if (record.clients === undefined) {
         return emptyCatalog();
     }
     if (!Array.isArray(record.clients)) {
-        throw new Error('clients 必须是数组');
+        throw new Error(t("clients must be an array"));
     }
 
     const seen = new Set<string>();
@@ -86,7 +87,7 @@ export function addProject(
         return { ...client, projects: [...client.projects, project] };
     });
     if (!found) {
-        throw new Error('找不到对应的客户');
+        throw new Error(t("Client not found"));
     }
     return { catalog: { ...catalog, clients }, project };
 }
@@ -116,7 +117,7 @@ export function addModule(
         }),
     }));
     if (!found) {
-        throw new Error('找不到对应的项目');
+        throw new Error(t("Project not found"));
     }
     return { catalog: { ...catalog, clients }, module };
 }
@@ -129,7 +130,7 @@ export function renameNode(catalog: Catalog, ref: NodeRef, name: string): Catalo
 export function setColor(catalog: Catalog, ref: NodeRef, color: string | undefined): Catalog {
     const nextColor = color === undefined ? undefined : normalizeColor(color);
     if (color !== undefined && !nextColor) {
-        throw new Error('颜色格式无效，请使用 #RGB 或 #RRGGBB');
+        throw new Error(t("Invalid color. Use #RGB or #RRGGBB"));
     }
     return mapNode(catalog, ref, node => ({ ...node, color: nextColor }));
 }
@@ -140,7 +141,7 @@ export function setDescription(catalog: Catalog, ref: NodeRef, description: stri
 
 export function setModulePath(catalog: Catalog, ref: NodeRef, modulePath: string): Catalog {
     if (ref.type !== 'module') {
-        throw new Error('只有模块可以设置路径');
+        throw new Error(t("Only modules can have a path"));
     }
     const path = requirePath(modulePath);
     return mapNode(catalog, ref, node => ({ ...node, path }));
@@ -148,7 +149,7 @@ export function setModulePath(catalog: Catalog, ref: NodeRef, modulePath: string
 
 export function setModuleKind(catalog: Catalog, ref: NodeRef, kind: ModuleKind): Catalog {
     if (ref.type !== 'module') {
-        throw new Error('只有模块可以设置类型');
+        throw new Error(t("Only modules can have a type"));
     }
     return mapNode(catalog, ref, node => ({ ...node, kind: requireKind(kind) }));
 }
@@ -396,7 +397,7 @@ export function mergeCatalog(base: Catalog, incoming: Catalog): Catalog {
 export function nodeLabel(catalog: Catalog, ref: NodeRef): string {
     const located = findNode(catalog, ref);
     if (!located) {
-        return '未知项';
+        return t("Unknown item");
     }
     if (located.type === 'client') {
         return located.client.name;
@@ -408,7 +409,7 @@ export function nodeLabel(catalog: Catalog, ref: NodeRef): string {
 }
 
 function parseClient(input: unknown, seen: Set<string>): ClientEntry {
-    const record = asRecord(input, '客户');
+    const record = asRecord(input, t("Client"));
     const projects = optionalArray(record.projects, 'projects').map(project => parseProject(project, seen));
     return {
         id: uniqueId(record.id, seen),
@@ -420,7 +421,7 @@ function parseClient(input: unknown, seen: Set<string>): ClientEntry {
 }
 
 function parseProject(input: unknown, seen: Set<string>): ProjectEntry {
-    const record = asRecord(input, '项目');
+    const record = asRecord(input, t("Project"));
     const modules = optionalArray(record.modules, 'modules').map(module => parseModule(module, seen));
     return {
         id: uniqueId(record.id, seen),
@@ -432,7 +433,7 @@ function parseProject(input: unknown, seen: Set<string>): ProjectEntry {
 }
 
 function parseModule(input: unknown, seen: Set<string>): ModuleEntry {
-    const record = asRecord(input, '模块');
+    const record = asRecord(input, t("Module"));
     return {
         id: uniqueId(record.id, seen),
         name: requireName(typeof record.name === 'string' ? record.name : ''),
@@ -448,14 +449,14 @@ function optionalArray(value: unknown, label: string): unknown[] {
         return [];
     }
     if (!Array.isArray(value)) {
-        throw new Error(`${label} 必须是数组`);
+        throw new Error(t("{0} must be an array", label));
     }
     return value;
 }
 
 function asRecord(input: unknown, label: string): Record<string, unknown> {
     if (!input || typeof input !== 'object' || Array.isArray(input)) {
-        throw new Error(`${label}必须是对象`);
+        throw new Error(t("{0} must be an object", label));
     }
     return input as Record<string, unknown>;
 }
@@ -473,7 +474,7 @@ function uniqueId(value: unknown, seen: Set<string>): string {
 function requireName(name: string): string {
     const trimmed = name.trim();
     if (!trimmed) {
-        throw new Error('名称不能为空');
+        throw new Error(t("Name cannot be empty"));
     }
     return trimmed;
 }
@@ -481,7 +482,7 @@ function requireName(name: string): string {
 function requirePath(modulePath: string): string {
     const trimmed = modulePath.trim();
     if (!trimmed) {
-        throw new Error('路径不能为空');
+        throw new Error(t("Path cannot be empty"));
     }
     return trimmed;
 }
@@ -494,7 +495,7 @@ function cleanText(value: string | undefined): string | undefined {
 function requireKind(kind: string): ModuleKind {
     const trimmed = kind.trim();
     if (!trimmed) {
-        throw new Error('类型不能为空');
+        throw new Error(t("Type cannot be empty"));
     }
     return trimmed;
 }
@@ -545,7 +546,7 @@ function mapNode<T extends { id: string }>(
         };
     });
     if (!found) {
-        throw new Error('找不到要修改的项');
+        throw new Error(t("Item to edit not found"));
     }
     return { ...catalog, clients };
 }
@@ -619,7 +620,7 @@ function insertProject(catalog: Catalog, clientId: string, project: ProjectEntry
         return { ...client, projects };
     });
     if (!found) {
-        throw new Error('找不到目标客户');
+        throw new Error(t("Destination client not found"));
     }
     return { ...catalog, clients };
 }
@@ -640,7 +641,7 @@ function insertModule(catalog: Catalog, projectId: string, module: ModuleEntry, 
         }),
     }));
     if (!found) {
-        throw new Error('找不到目标项目');
+        throw new Error(t("Destination project not found"));
     }
     return { ...catalog, clients };
 }

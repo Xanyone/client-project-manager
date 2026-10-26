@@ -1,3 +1,4 @@
+import { t } from './i18n.js';
 import * as vscode from 'vscode';
 import { emptyCatalog, parseCatalog } from './catalog.js';
 import { CONFIG_SECTION, GLOBAL_STATE_KEY } from './constants.js';
@@ -24,7 +25,7 @@ export class CatalogStore implements vscode.Disposable {
         this.configurationListener = vscode.workspace.onDidChangeConfiguration(event => {
             if (event.affectsConfiguration(`${CONFIG_SECTION}.storage`)) {
                 void this.enqueue(() => this.changeStorage()).catch(error => {
-                    void vscode.window.showErrorMessage(`切换存储失败：${String(error)}`);
+                    void vscode.window.showErrorMessage(t("Failed to switch storage: {0}", String(error)));
                 });
             } else if (!this.saving && event.affectsConfiguration(`${CONFIG_SECTION}.catalog`)) {
                 this.reloadFromExternal();
@@ -40,11 +41,11 @@ export class CatalogStore implements vscode.Disposable {
         return this.enqueue(async () => {
             if (this.protect) {
                 const choice = await vscode.window.showWarningMessage(
-                    '当前保存的分组数据无法解析。继续保存会覆盖原数据。',
+                    t("The saved catalog cannot be read. Saving will overwrite the original data."),
                     { modal: true },
-                    '覆盖保存',
+                    t("Overwrite"),
                 );
-                if (choice !== '覆盖保存') {
+                if (choice !== t("Overwrite")) {
                     return false;
                 }
             }
@@ -142,11 +143,11 @@ export class CatalogStore implements vscode.Disposable {
     }
 
     private readGlobal(): ReadResult {
-        return this.parseStored(this.context.globalState.get(GLOBAL_STATE_KEY), '本机存储');
+        return this.parseStored(this.context.globalState.get(GLOBAL_STATE_KEY), t("Local storage"));
     }
 
     private readSettings(): ReadResult {
-        return this.parseStored(vscode.workspace.getConfiguration(CONFIG_SECTION).get('catalog'), '设置');
+        return this.parseStored(vscode.workspace.getConfiguration(CONFIG_SECTION).get('catalog'), t("Settings"));
     }
 
     private parseStored(value: unknown, source: string): ReadResult {
@@ -156,8 +157,8 @@ export class CatalogStore implements vscode.Disposable {
         try {
             return { status: 'ok', catalog: parseCatalog(value) };
         } catch (error) {
-            const message = error instanceof Error ? error.message : '数据无法读取';
-            void vscode.window.showErrorMessage(`${source}中的客户项目数据无法读取：${message}`);
+            const message = error instanceof Error ? error.message : t("Unable to read data");
+            void vscode.window.showErrorMessage(t("Unable to read catalog from {0}: {1}", source, message));
             return { status: 'corrupt' };
         }
     }
