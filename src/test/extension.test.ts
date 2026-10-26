@@ -2,10 +2,6 @@ import * as assert from 'node:assert/strict';
 import * as vscode from 'vscode';
 
 suite('extension host', () => {
-    test('command API is available', () => {
-        assert.ok(vscode.commands);
-    });
-
     test('activates the extension and registers every contributed command', async () => {
         const extension = vscode.extensions.getExtension('Xanyone.client-project-dashboard');
         assert.ok(extension);

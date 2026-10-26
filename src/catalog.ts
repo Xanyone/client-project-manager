@@ -12,7 +12,6 @@ import {
     type NamedInput,
     type NodeRef,
     type ProjectEntry,
-    isModuleKind,
 } from './types.js';
 
 const HEX_COLOR = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
@@ -100,7 +99,7 @@ export function addModule(
     const module: ModuleEntry = {
         id: randomUUID(),
         name: requireName(input.name),
-        kind: input.kind,
+        kind: requireKind(input.kind),
         path: requirePath(input.path),
         color: normalizeColor(input.color),
         description: cleanText(input.description),
@@ -151,7 +150,7 @@ export function setModuleKind(catalog: Catalog, ref: NodeRef, kind: ModuleKind):
     if (ref.type !== 'module') {
         throw new Error('只有模块可以设置类型');
     }
-    return mapNode(catalog, ref, node => ({ ...node, kind }));
+    return mapNode(catalog, ref, node => ({ ...node, kind: requireKind(kind) }));
 }
 
 export function removeNode(catalog: Catalog, ref: NodeRef): Catalog {
@@ -437,7 +436,7 @@ function parseModule(input: unknown, seen: Set<string>): ModuleEntry {
     return {
         id: uniqueId(record.id, seen),
         name: requireName(typeof record.name === 'string' ? record.name : ''),
-        kind: isModuleKind(record.kind) ? record.kind : 'other',
+        kind: requireKind(typeof record.kind === 'string' ? record.kind : ''),
         path: requirePath(typeof record.path === 'string' ? record.path : ''),
         color: normalizeColor(record.color),
         description: cleanText(typeof record.description === 'string' ? record.description : undefined),
@@ -490,6 +489,14 @@ function requirePath(modulePath: string): string {
 function cleanText(value: string | undefined): string | undefined {
     const trimmed = value?.trim();
     return trimmed ? trimmed : undefined;
+}
+
+function requireKind(kind: string): ModuleKind {
+    const trimmed = kind.trim();
+    if (!trimmed) {
+        throw new Error('类型不能为空');
+    }
+    return trimmed;
 }
 
 function sameName(left: string, right: string): boolean {

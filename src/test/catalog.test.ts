@@ -111,6 +111,23 @@ suite('catalog', () => {
         assert.throws(() => parseCatalog({ version: 2, clients: [] }), /不支持的数据版本/);
     });
 
+    test('accepts custom module kinds and rejects empty kinds', () => {
+        const parsed = parseCatalog({
+            clients: [{
+                name: '客户',
+                projects: [{
+                    name: '项目',
+                    modules: [{ name: '服务', kind: 'GraphQL API', path: 'D:/service' }],
+                }],
+            }],
+        });
+        assert.equal(parsed.clients[0].projects[0].modules[0].kind, 'GraphQL API');
+        assert.throws(() => parseCatalog({
+            clients: [{ name: '客户', projects: [{ name: '项目', modules: [{ name: '服务', kind: '  ', path: 'D:/service' }] }] }],
+        }), /类型不能为空/);
+        assert.throws(() => addModule(emptyCatalog(), 'missing', { name: '服务', kind: '  ', path: 'D:/service' }), /类型不能为空/);
+    });
+
     test('merges same client and skips a duplicated module path', () => {
         const seeded = seed();
         const incoming = parseCatalog({

@@ -1,8 +1,6 @@
 export const CATALOG_VERSION = 1;
 
-export const MODULE_KINDS = ['frontend', 'backend', 'mobile', 'admin', 'docs', 'infra', 'other'] as const;
-
-export type ModuleKind = typeof MODULE_KINDS[number];
+export type ModuleKind = string;
 export type NodeType = 'client' | 'project' | 'module';
 
 export interface NodeRef {
@@ -90,7 +88,7 @@ export interface DashboardClient {
 }
 
 export interface DashboardKind {
-    id: ModuleKind;
+    id: string;
     label: string;
     color: string;
 }
@@ -100,10 +98,6 @@ export interface DashboardModel {
     showPath: boolean;
     kinds: DashboardKind[];
     clients: DashboardClient[];
-}
-
-export function isModuleKind(value: unknown): value is ModuleKind {
-    return typeof value === 'string' && (MODULE_KINDS as readonly string[]).includes(value);
 }
 
 export function isNodeType(value: unknown): value is NodeType {

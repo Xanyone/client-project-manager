@@ -2,7 +2,7 @@
   "name": "client-project-dashboard",
   "displayName": "客户项目仪表盘",
   "description": "按客户、项目、模块分组管理目录，并从仪表盘快速打开。",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "publisher": "Xanyone",
   "engines": {
     "vscode": "^1.140.0"

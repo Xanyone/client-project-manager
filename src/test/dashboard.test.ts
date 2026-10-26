@@ -36,4 +36,21 @@ suite('dashboard interactions', () => {
         assert.equal(dom.window.document.querySelector('.client-name')?.textContent, '<img src=x onerror=alert(1)>');
         dom.window.close();
     });
+
+    test('filters by custom module kinds without treating inherited object keys as kinds', () => {
+        const dom = new JSDOM('<body><input id=search><div id=metrics></div><div class=stage-tools><div id=filters></div></div><div id=list></div></body>', { runScripts: 'outside-only' });
+        Object.assign(dom.window, { acquireVsCodeApi: () => ({ getState: () => undefined, setState() {}, postMessage() {} }) });
+        dom.window.eval(readFileSync(resolve(__dirname, '../../media/dashboard.js'), 'utf8'));
+        const module = (id: string, kind: string, kindLabel: string) => ({ id, name: id, kind, kindLabel, path: `D:/${id}`, exists: true, color: '#8b9bb4' });
+        dom.window.dispatchEvent(new dom.window.MessageEvent('message', { data: {
+            type: 'render',
+            model: { clients: [{ id: 'c', name: 'customer', color: '#4c8dff', projects: [{ id: 'p', name: 'project', color: '#4c8dff', modules: [module('api', 'GraphQL API', 'GraphQL API'), module('prototype', 'toString', 'toString')] }] }] },
+        } }));
+        const doc = dom.window.document;
+        assert.equal(doc.querySelectorAll('[data-action=filter-kind]').length, 3);
+        (Array.from(doc.querySelectorAll('[data-action=filter-kind]'))[1] as HTMLElement).click();
+        assert.equal(doc.querySelectorAll('.module-card').length, 1);
+        assert.equal(doc.querySelector('.module-name')?.textContent, 'api');
+        dom.window.close();
+    });
 });

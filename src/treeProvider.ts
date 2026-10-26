@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import type { ProjectActions } from './actions.js';
 import { findNode, parentOf } from './catalog.js';
-import { KIND_ICONS, KIND_LABELS, TREE_MIME } from './constants.js';
+import { TREE_MIME } from './constants.js';
 import { inspectPath } from './paths.js';
 import type { CatalogStore } from './store.js';
 import { type NodeRef, isNodeRef } from './types.js';
@@ -103,14 +103,14 @@ export class ProjectTreeProvider implements vscode.TreeDataProvider<ProjectTreeI
         }
         if (located?.type === 'module') {
             const item = new ProjectTreeItem(ref, located.module.name, vscode.TreeItemCollapsibleState.None);
-            item.iconPath = new vscode.ThemeIcon(KIND_ICONS[located.module.kind]);
+            item.iconPath = new vscode.ThemeIcon('folder');
             const inspected = inspectPath(located.module.path);
             item.description = inspected.exists
-                ? KIND_LABELS[located.module.kind]
-                : `${KIND_LABELS[located.module.kind]} · 路径不存在`;
+                ? located.module.kind
+                : `${located.module.kind} · 路径不存在`;
             item.tooltip = tooltip(
                 located.module.name,
-                `${KIND_LABELS[located.module.kind]}${inspected.git ? ' · Git' : ''}`,
+                `${located.module.kind}${inspected.git ? ' · Git' : ''}`,
                 located.module.path,
             );
             item.command = {

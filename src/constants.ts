@@ -38,35 +38,7 @@ export const COLOR_PRESETS: ReadonlyArray<{ label: string; hex: string }> = [
     { label: '紫色', hex: '#c792ea' },
 ];
 
-export const KIND_LABELS = {
-    frontend: '前端',
-    backend: '后端',
-    mobile: '移动端',
-    admin: '管理端',
-    docs: '文档',
-    infra: '基础设施',
-    other: '其他',
-} as const;
-
-export const KIND_ICONS = {
-    frontend: 'browser',
-    backend: 'server',
-    mobile: 'device-mobile',
-    admin: 'shield',
-    docs: 'book',
-    infra: 'cloud',
-    other: 'folder',
-} as const;
-
-export const KIND_COLORS = {
-    frontend: '#4c8dff',
-    backend: '#3ddc97',
-    mobile: '#c792ea',
-    admin: '#f5a524',
-    docs: '#82aaff',
-    infra: '#2dd4bf',
-    other: '#8b9bb4',
-} as const;
+export const DEFAULT_KIND_COLOR = '#8b9bb4';
 
 export function colorAt(index: number): string {
     const safeIndex = ((index % COLOR_PRESETS.length) + COLOR_PRESETS.length) % COLOR_PRESETS.length;

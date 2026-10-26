@@ -20,13 +20,11 @@ import {
     setModuleKind,
     setModulePath,
 } from './catalog.js';
-import { COLOR_PRESETS, CONFIG_SECTION, KIND_ICONS, KIND_LABELS, colorAt } from './constants.js';
+import { COLOR_PRESETS, CONFIG_SECTION, colorAt } from './constants.js';
 import { openFolders, openPath, revealPath } from './opener.js';
-import { guessKind, inspectPath, isFilePath } from './paths.js';
+import { inspectPath, isFilePath } from './paths.js';
 import type { CatalogStore } from './store.js';
 import {
-    MODULE_KINDS,
-    type ModuleKind,
     type NodeRef,
     isNodeRef,
 } from './types.js';
@@ -100,7 +98,7 @@ export class ProjectActions {
         void vscode.window.showInformationMessage(`已添加项目「${created.project.name}」`);
     }
 
-    async addModule(projectId?: string, preferredKind?: ModuleKind): Promise<void> {
+    async addModule(projectId?: string): Promise<void> {
         const resolvedProjectId = projectId ?? await this.pickProject();
         if (!resolvedProjectId) {
             return;
@@ -115,7 +113,7 @@ export class ProjectActions {
         if (!uris?.[0]) {
             return;
         }
-        await this.addOneModule(resolvedProjectId, uris[0].fsPath, preferredKind);
+        await this.addOneModule(resolvedProjectId, uris[0].fsPath);
     }
 
     async addDroppedFolders(target: NodeRef | undefined, uris: readonly vscode.Uri[]): Promise<void> {
@@ -199,7 +197,10 @@ export class ProjectActions {
         if (!resolved) {
             return;
         }
-        const kind = await this.pickKind();
+        const located = findNode(this.store.get(), resolved);
+        const kind = located?.type === 'module'
+            ? await askText('目录类型', '请输入自定义类型', located.module.kind)
+            : undefined;
         if (!kind) {
             return;
         }
@@ -413,10 +414,13 @@ export class ProjectActions {
         await this.store.update(result.catalog);
     }
 
-    private async addOneModule(projectId: string, folder: string, preferredKind?: ModuleKind): Promise<void> {
-        const kind = preferredKind ?? guessKind(basename(folder));
+    private async addOneModule(projectId: string, folder: string): Promise<void> {
         const name = await askText('目录名称', '请输入名称', basename(folder));
         if (!name) {
+            return;
+        }
+        const kind = await askText('目录类型', '请输入自定义类型，例如：前端、API、配置');
+        if (!kind) {
             return;
         }
         if (await this.rejectDuplicate({ type: 'project', id: projectId }, name)) {
@@ -520,23 +524,6 @@ export class ProjectActions {
         return picked?.id;
     }
 
-    private async pickKind(suggested?: ModuleKind): Promise<ModuleKind | undefined> {
-        const picked = await vscode.window.showQuickPick(
-            MODULE_KINDS.map(moduleKind => ({
-                label: moduleKind === suggested ? `${KIND_LABELS[moduleKind]}（推荐）` : KIND_LABELS[moduleKind],
-                description: moduleKind,
-                moduleKind,
-            })),
-            {
-                placeHolder: '模块类型',
-            },
-        );
-        if (!picked) {
-            return undefined;
-        }
-        return picked.moduleKind;
-    }
-
     private async pickFolder(title: string, current?: string): Promise<string | undefined> {
         const uris = await vscode.window.showOpenDialog({
             title,
@@ -573,7 +560,7 @@ export class ProjectActions {
                 for (const module of project.modules) {
                     if (!expected || expected === 'module') {
                         items.push({
-                            label: `$(${KIND_ICONS[module.kind]}) ${module.name}`,
+                            label: `$(folder) ${module.name}`,
                             description: `${client.name} / ${project.name}`,
                             ref: { type: 'module', id: module.id },
                         });

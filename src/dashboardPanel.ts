@@ -1,14 +1,12 @@
 import * as vscode from 'vscode';
 import { randomBytes } from 'node:crypto';
 import type { ProjectActions } from './actions.js';
-import { KIND_COLORS, KIND_LABELS, CONFIG_SECTION, colorAt } from './constants.js';
+import { DEFAULT_KIND_COLOR, CONFIG_SECTION, colorAt } from './constants.js';
 import { inspectPath } from './paths.js';
 import type { CatalogStore } from './store.js';
 import {
-    MODULE_KINDS,
     type DashboardModel,
     type NodeRef,
-    isModuleKind,
     isNodeType,
 } from './types.js';
 
@@ -68,13 +66,16 @@ export class DashboardPanel implements vscode.Disposable {
 
     private model(): DashboardModel {
         const config = vscode.workspace.getConfiguration(CONFIG_SECTION);
+        const kinds = [...new Set(this.store.get().clients.flatMap(client =>
+            client.projects.flatMap(project => project.modules.map(module => module.kind)),
+        ))];
         return {
             openInNewWindow: config.get<boolean>('openInNewWindow', false),
             showPath: config.get<boolean>('showPath', true),
-            kinds: MODULE_KINDS.map(kind => ({
+            kinds: kinds.map(kind => ({
                 id: kind,
-                label: KIND_LABELS[kind],
-                color: KIND_COLORS[kind],
+                label: kind,
+                color: DEFAULT_KIND_COLOR,
             })),
             clients: this.store.get().clients.map((client, clientIndex) => ({
                 id: client.id,
@@ -92,10 +93,10 @@ export class DashboardPanel implements vscode.Disposable {
                             id: module.id,
                             name: module.name,
                             kind: module.kind,
-                            kindLabel: KIND_LABELS[module.kind],
+                            kindLabel: module.kind,
                             path: module.path,
                             description: module.description ?? '',
-                            color: module.color ?? KIND_COLORS[module.kind],
+                            color: module.color ?? DEFAULT_KIND_COLOR,
                             exists: inspected.exists,
                             git: inspected.git,
                         };
@@ -111,7 +112,6 @@ export class DashboardPanel implements vscode.Disposable {
         }
         const record = message as Record<string, unknown>;
         const ref = readRef(record);
-        const kind = isModuleKind(record.kind) ? record.kind : undefined;
         try {
             switch (record.type) {
                 case 'ready':
@@ -140,7 +140,7 @@ export class DashboardPanel implements vscode.Disposable {
                     await this.actions.addProject(ref?.type === 'client' ? ref.id : undefined);
                     break;
                 case 'add-module':
-                    await this.actions.addModule(ref?.type === 'project' ? ref.id : undefined, kind);
+                    await this.actions.addModule(ref?.type === 'project' ? ref.id : undefined);
                     break;
                 case 'edit':
                     await this.actions.edit(ref);

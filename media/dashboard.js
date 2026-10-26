@@ -579,15 +579,20 @@
         if (current.kinds && current.kinds.length) {
             return current.kinds;
         }
-        return [
-            { id: 'frontend', label: '前端', color: '#4c8dff' },
-            { id: 'backend', label: '后端', color: '#3ddc97' },
-            { id: 'mobile', label: '移动端', color: '#c792ea' },
-            { id: 'admin', label: '管理端', color: '#f5a524' },
-            { id: 'docs', label: '文档', color: '#82aaff' },
-            { id: 'infra', label: '基础设施', color: '#2dd4bf' },
-            { id: 'other', label: '其他', color: '#8b9bb4' },
-        ];
+        const kinds = [];
+        const seen = new Set();
+        (current.clients || []).forEach(function (client) {
+            (client.projects || []).forEach(function (project) {
+                (project.modules || []).forEach(function (module) {
+                    const id = module.kind || module.kindLabel || '其他';
+                    if (!seen.has(id)) {
+                        seen.add(id);
+                        kinds.push({ id: id, label: module.kindLabel || id, color: module.color || '#8b9bb4' });
+                    }
+                });
+            });
+        });
+        return kinds;
     }
 
     function includes(value, needle) {
