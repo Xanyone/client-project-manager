@@ -1,0 +1,378 @@
+{
+  "name": "client-project-dashboard",
+  "displayName": "客户项目仪表盘",
+  "description": "按客户、项目、模块分组管理目录，并从仪表盘快速打开。",
+  "version": "0.2.0",
+  "publisher": "Xanyone",
+  "engines": {
+    "vscode": "^1.140.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    }
+  },
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "clientProjectDashboard",
+          "title": "客户项目",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "clientProjectDashboard": [
+        {
+          "id": "clientProjectDashboard.explorer",
+          "name": "分组",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "clientProjectDashboard.explorer",
+        "contents": "按客户、项目、模块管理目录。\n[添加客户](command:clientProjectDashboard.addClient)\n[打开仪表盘](command:clientProjectDashboard.openDashboard)"
+      }
+    ],
+    "commands": [
+      {
+        "command": "clientProjectDashboard.openDashboard",
+        "title": "打开仪表盘",
+        "category": "客户项目",
+        "icon": "$(dashboard)"
+      },
+      {
+        "command": "clientProjectDashboard.addClient",
+        "title": "添加客户",
+        "category": "客户项目",
+        "icon": "$(add)"
+      },
+      {
+        "command": "clientProjectDashboard.addProject",
+        "title": "添加项目",
+        "category": "客户项目",
+        "icon": "$(folder)"
+      },
+      {
+        "command": "clientProjectDashboard.addModule",
+        "title": "添加模块",
+        "category": "客户项目",
+        "icon": "$(new-folder)"
+      },
+      {
+        "command": "clientProjectDashboard.rename",
+        "title": "重命名",
+        "category": "客户项目",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "clientProjectDashboard.setColor",
+        "title": "设置颜色",
+        "category": "客户项目",
+        "icon": "$(symbol-color)"
+      },
+      {
+        "command": "clientProjectDashboard.setKind",
+        "title": "设置模块类型",
+        "category": "客户项目"
+      },
+      {
+        "command": "clientProjectDashboard.setPath",
+        "title": "设置路径",
+        "category": "客户项目"
+      },
+      {
+        "command": "clientProjectDashboard.setDescription",
+        "title": "设置说明",
+        "category": "客户项目"
+      },
+      {
+        "command": "clientProjectDashboard.edit",
+        "title": "编辑",
+        "category": "客户项目",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "clientProjectDashboard.remove",
+        "title": "删除",
+        "category": "客户项目",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "clientProjectDashboard.open",
+        "title": "打开",
+        "category": "客户项目",
+        "icon": "$(folder-opened)"
+      },
+      {
+        "command": "clientProjectDashboard.openInNewWindow",
+        "title": "在新窗口打开",
+        "category": "客户项目",
+        "icon": "$(window)"
+      },
+      {
+        "command": "clientProjectDashboard.openWorkspace",
+        "title": "以工作区打开",
+        "category": "客户项目"
+      },
+      {
+        "command": "clientProjectDashboard.reveal",
+        "title": "在文件管理器中显示",
+        "category": "客户项目"
+      },
+      {
+        "command": "clientProjectDashboard.copyPath",
+        "title": "复制路径",
+        "category": "客户项目",
+        "icon": "$(copy)"
+      },
+      {
+        "command": "clientProjectDashboard.moveUp",
+        "title": "上移",
+        "category": "客户项目",
+        "icon": "$(arrow-up)"
+      },
+      {
+        "command": "clientProjectDashboard.moveDown",
+        "title": "下移",
+        "category": "客户项目",
+        "icon": "$(arrow-down)"
+      },
+      {
+        "command": "clientProjectDashboard.refresh",
+        "title": "刷新",
+        "category": "客户项目",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "clientProjectDashboard.exportCatalog",
+        "title": "导出分组备份",
+        "category": "客户项目"
+      },
+      {
+        "command": "clientProjectDashboard.importCatalog",
+        "title": "导入分组备份",
+        "category": "客户项目"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "clientProjectDashboard.openDashboard",
+          "when": "view == clientProjectDashboard.explorer",
+          "group": "navigation@1"
+        },
+        {
+          "command": "clientProjectDashboard.addClient",
+          "when": "view == clientProjectDashboard.explorer",
+          "group": "navigation@2"
+        },
+        {
+          "command": "clientProjectDashboard.refresh",
+          "when": "view == clientProjectDashboard.explorer",
+          "group": "navigation@3"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "clientProjectDashboard.addProject",
+          "when": "view == clientProjectDashboard.explorer && viewItem == client",
+          "group": "navigation@1"
+        },
+        {
+          "command": "clientProjectDashboard.openWorkspace",
+          "when": "view == clientProjectDashboard.explorer && viewItem == client",
+          "group": "navigation@2"
+        },
+        {
+          "command": "clientProjectDashboard.addModule",
+          "when": "view == clientProjectDashboard.explorer && viewItem == project",
+          "group": "navigation@1"
+        },
+        {
+          "command": "clientProjectDashboard.openWorkspace",
+          "when": "view == clientProjectDashboard.explorer && viewItem == project",
+          "group": "navigation@2"
+        },
+        {
+          "command": "clientProjectDashboard.open",
+          "when": "view == clientProjectDashboard.explorer && viewItem == module",
+          "group": "navigation@1"
+        },
+        {
+          "command": "clientProjectDashboard.openInNewWindow",
+          "when": "view == clientProjectDashboard.explorer && viewItem == module",
+          "group": "navigation@2"
+        },
+        {
+          "command": "clientProjectDashboard.reveal",
+          "when": "view == clientProjectDashboard.explorer && viewItem == module",
+          "group": "navigation@3"
+        },
+        {
+          "command": "clientProjectDashboard.copyPath",
+          "when": "view == clientProjectDashboard.explorer && viewItem == module",
+          "group": "navigation@4"
+        },
+        {
+          "command": "clientProjectDashboard.rename",
+          "when": "view == clientProjectDashboard.explorer && viewItem =~ /^(client|project|module)$/",
+          "group": "2_edit@1"
+        },
+        {
+          "command": "clientProjectDashboard.setPath",
+          "when": "view == clientProjectDashboard.explorer && viewItem == module",
+          "group": "2_edit@2"
+        },
+        {
+          "command": "clientProjectDashboard.setKind",
+          "when": "view == clientProjectDashboard.explorer && viewItem == module",
+          "group": "2_edit@3"
+        },
+        {
+          "command": "clientProjectDashboard.setColor",
+          "when": "view == clientProjectDashboard.explorer && viewItem =~ /^(client|project|module)$/",
+          "group": "2_edit@4"
+        },
+        {
+          "command": "clientProjectDashboard.setDescription",
+          "when": "view == clientProjectDashboard.explorer && viewItem =~ /^(client|project|module)$/",
+          "group": "2_edit@5"
+        },
+        {
+          "command": "clientProjectDashboard.moveUp",
+          "when": "view == clientProjectDashboard.explorer && viewItem =~ /^(client|project|module)$/",
+          "group": "3_move@1"
+        },
+        {
+          "command": "clientProjectDashboard.moveDown",
+          "when": "view == clientProjectDashboard.explorer && viewItem =~ /^(client|project|module)$/",
+          "group": "3_move@2"
+        },
+        {
+          "command": "clientProjectDashboard.remove",
+          "when": "view == clientProjectDashboard.explorer && viewItem =~ /^(client|project|module)$/",
+          "group": "4_danger@1"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "clientProjectDashboard.openDashboard",
+        "key": "ctrl+alt+g",
+        "mac": "cmd+alt+g"
+      }
+    ],
+    "configuration": {
+      "title": "客户项目仪表盘",
+      "properties": {
+        "clientProjectDashboard.openOnStartup": {
+          "type": "string",
+          "enum": [
+            "never",
+            "emptyWindow",
+            "always"
+          ],
+          "enumDescriptions": [
+            "不自动打开",
+            "只在没有打开文件夹时打开",
+            "每次启动都打开"
+          ],
+          "default": "never",
+          "description": "启动时是否打开仪表盘。"
+        },
+        "clientProjectDashboard.openInNewWindow": {
+          "type": "boolean",
+          "default": false,
+          "description": "点击模块时在新窗口打开。按住 Ctrl/Cmd 会使用相反的行为。"
+        },
+        "clientProjectDashboard.showPath": {
+          "type": "boolean",
+          "default": true,
+          "description": "在仪表盘目录卡片上显示路径末段。悬停卡片可看完整路径。"
+        },
+        "clientProjectDashboard.storage": {
+          "type": "string",
+          "enum": [
+            "globalState",
+            "settings"
+          ],
+          "enumDescriptions": [
+            "保存在本机扩展存储中",
+            "保存在用户设置中，可随 Settings Sync 同步"
+          ],
+          "default": "globalState",
+          "description": "分组数据的保存位置。",
+          "scope": "application"
+        },
+        "clientProjectDashboard.catalog": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "default": null,
+          "description": "当存储方式为 settings 时使用的分组数据。一般不用手改。",
+          "scope": "application"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "npm run check-types && npm run lint && node esbuild.js",
+    "watch": "npm-run-all -p watch:*",
+    "watch:esbuild": "node esbuild.js --watch",
+    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+    "package": "npm run check-types && npm run lint && node esbuild.js --production",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint src --max-warnings 0 && node --check media/dashboard.js",
+    "test": "vscode-test",
+    "package:vsix": "vsce package --no-dependencies",
+    "test:unit": "npm run compile-tests && mocha --ui tdd out/test/catalog.test.js"
+  },
+  "devDependencies": {
+    "@types/jsdom": "^30.0.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "24.x",
+    "@types/sinon": "^22.0.2",
+    "@types/vscode": "^1.140.0",
+    "@vscode/test-cli": "^0.0.15",
+    "@vscode/test-electron": "^3.0.0",
+    "@vscode/vsce": "^4.0.0",
+    "esbuild": "^0.28.1",
+    "eslint": "^10.5.0",
+    "jsdom": "^30.1.3",
+    "mocha": "^12.0.3",
+    "npm-run-all": "^4.1.5",
+    "sinon": "^22.1.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.61.1"
+  },
+  "overrides": {
+    "diff": "^8.0.4",
+    "serialize-javascript": "^7.0.6",
+    "@azure/msal-node": "^7.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Xanyone/project-dashboard.git"
+  },
+  "homepage": "https://github.com/Xanyone/project-dashboard#readme",
+  "bugs": {
+    "url": "https://github.com/Xanyone/project-dashboard/issues"
+  },
+  "license": "MIT"
+}

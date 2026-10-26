@@ -1,0 +1,39 @@
+import * as vscode from 'vscode';
+import { ProjectActions } from './actions.js';
+import { CONFIG_SECTION, VIEW_ID } from './constants.js';
+import { registerCommands } from './commands.js';
+import { DashboardPanel } from './dashboardPanel.js';
+import { CatalogStore } from './store.js';
+import { ProjectTreeProvider } from './treeProvider.js';
+
+export function activate(context: vscode.ExtensionContext): void {
+    const store = new CatalogStore(context);
+    const actions = new ProjectActions(context, store);
+    const tree = new ProjectTreeProvider(store, actions);
+    const dashboard = new DashboardPanel(context, store, actions);
+    const treeView = vscode.window.createTreeView(VIEW_ID, {
+        treeDataProvider: tree,
+        dragAndDropController: tree,
+        showCollapseAll: true,
+    });
+
+    context.subscriptions.push(
+        store,
+        tree,
+        treeView,
+        dashboard,
+        ...registerCommands(actions, dashboard, tree, store),
+        store.onDidChange(() => {
+            tree.refresh();
+            dashboard.update();
+        }),
+    );
+
+    const startup = vscode.workspace.getConfiguration(CONFIG_SECTION).get<string>('openOnStartup', 'never');
+    const hasFolder = (vscode.workspace.workspaceFolders?.length ?? 0) > 0;
+    if (startup === 'always' || (startup === 'emptyWindow' && !hasFolder)) {
+        dashboard.show();
+    }
+}
+
+export function deactivate(): void {}
