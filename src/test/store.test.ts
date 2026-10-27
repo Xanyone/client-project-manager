@@ -78,4 +78,53 @@ suite('catalog storage', () => {
         store.reload();
         assert.equal(store.get().clients.length, 2);
     });
+
+    test('keeps the original storage usable after a migration backup failure', async () => {
+        await store.update(current => addClient(current, { name: 'first' }).catalog);
+        write.onCall(write.callCount).rejects(new Error('backup failed'));
+        mode = 'settings';
+        change({ affectsConfiguration: key => key === `${CONFIG_SECTION}.storage` } as vscode.ConfigurationChangeEvent);
+        await store.update(current => addClient(current, { name: 'second' }).catalog);
+        assert.equal(settings, null);
+        assert.equal((values.get(GLOBAL_STATE_KEY) as { clients: unknown[] }).clients.length, 2);
+    });
+
+    test('does not persist an unchanged catalog', async () => {
+        await store.update(current => current);
+        assert.equal(write.callCount, 0);
+    });
+
+    test('keeps corrupt data protected when changing storage mode', async () => {
+        store.dispose();
+        const original = { version: 999 };
+        values.set(GLOBAL_STATE_KEY, original);
+        store = createStore();
+        mode = 'settings';
+        change({ affectsConfiguration: key => key === `${CONFIG_SECTION}.storage` } as vscode.ConfigurationChangeEvent);
+        assert.equal(await store.update(emptyCatalog()), false);
+        assert.equal(write.callCount, 0);
+        assert.deepEqual(values.get(GLOBAL_STATE_KEY), original);
+    });
+
+    test('treats an invalid configured storage mode as globalState', async () => {
+        (vscode.workspace.getConfiguration as sinon.SinonStub).returns({
+            get: (key: string, fallback: unknown) => key === 'storage' ? 'invalid-mode' : key === 'catalog' ? settings : fallback,
+            update: async (_key: string, value: unknown) => { settings = value; },
+        });
+        store.dispose();
+        store = createStore();
+        await store.update(current => addClient(current, { name: 'Client' }).catalog);
+        assert.equal((values.get(GLOBAL_STATE_KEY) as { clients: unknown[] }).clients.length, 1);
+        assert.equal(settings, null);
+    });
+
+    test('exports original duplicate data instead of the protected empty view', async () => {
+        store.dispose();
+        const original = { version: 1, clients: [{ id: 'a', name: 'Client' }, { id: 'b', name: 'client' }] };
+        values.set(GLOBAL_STATE_KEY, original);
+        store = createStore();
+        assert.equal(store.get().clients.length, 0);
+        assert.deepEqual(JSON.parse(await store.backup()), original);
+        assert.equal(await store.update(emptyCatalog()), false);
+    });
 });

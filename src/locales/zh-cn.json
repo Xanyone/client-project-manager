@@ -140,5 +140,10 @@
   "{0} project": "{0} 个项目",
   "{0} folder": "{0} 个目录",
   "{0} module": "{0} 个模块",
-  "{0} missing path": "{0} 个路径缺失"
+  "{0} missing path": "{0} 个路径缺失",
+  "An item named \"{0}\" already exists in this group": "同级已有名为「{0}」的项，请使用其他名称",
+  "This folder is already in this project: {0}": "此项目已添加该目录：{0}",
+  "Use an absolute folder path or a file/remote URI": "请使用绝对目录路径或 file/远程 URI",
+  "Duplicate item ID: {0}": "重复的条目 ID：{0}",
+  "The catalog changed in another operation. Please retry.": "目录已被其他操作更新，请重试。"
 }

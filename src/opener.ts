@@ -1,8 +1,8 @@
 import { t } from './i18n.js';
-import { normalize } from 'node:path';
 import { createHash, randomUUID } from 'node:crypto';
 import * as vscode from 'vscode';
-import { isFilePath, safeFileName, uniqueName } from './paths.js';
+import { isFilePath, locationKey, safeFileName, sameLocation, uniqueName } from './paths.js';
+import { deduplicateFolders } from './catalog.js';
 import type { FolderLocation } from './types.js';
 
 interface StoredWindow {
@@ -42,12 +42,10 @@ export async function openFolders(
     folders: readonly FolderLocation[],
     newWindow: boolean,
 ): Promise<void> {
-    const available = folders.filter(folder => folder.location);
+    const available = deduplicateFolders(folders.filter(folder => folder.location));
     if (available.length === 0) {
         throw new Error(t("No folders to open"));
     }
-
-    await forgetGeneratedWorkspaces(context);
 
     const single = available.length === 1 ? available[0] : undefined;
     const alreadyOpen = single !== undefined && newWindow
@@ -84,9 +82,10 @@ async function openGeneratedWorkspace(
     await ensureDirectory(context.globalStorageUri);
     const directory = vscode.Uri.joinPath(context.globalStorageUri, 'workspaces');
     await ensureDirectory(directory);
+    await cleanupWorkspaces(context, directory);
     const stamp = newWindow
         ? `-${randomUUID()}`
-        : `-${createHash('sha256').update(JSON.stringify(folders)).digest('hex').slice(0, 12)}`;
+        : `-${createHash('sha256').update(JSON.stringify(folders.map(folder => ({ name: folder.name, location: locationKey(folder.location) })))).digest('hex').slice(0, 16)}`;
     const file = vscode.Uri.joinPath(directory, `${safeFileName(title)}${stamp}.code-workspace`);
     const names: string[] = [];
     const content = {
@@ -102,7 +101,7 @@ async function openGeneratedWorkspace(
     await vscode.workspace.fs.writeFile(file, Buffer.from(JSON.stringify(content, null, 2), 'utf8'));
     await openUri(file, newWindow, true);
     if (newWindow) {
-        await vscode.commands.executeCommand('vscode.removeFromRecentlyOpened', file);
+        await removeRecent(file);
     }
 }
 
@@ -119,23 +118,9 @@ async function rememberFolders(folders: readonly FolderLocation[]): Promise<void
     }));
 }
 
-async function forgetGeneratedWorkspaces(context: vscode.ExtensionContext): Promise<void> {
-    const directory = vscode.Uri.joinPath(context.globalStorageUri, 'workspaces');
-    let entries: [string, vscode.FileType][];
-    try {
-        entries = await vscode.workspace.fs.readDirectory(directory);
-    } catch {
-        return;
-    }
-    await Promise.all(entries.map(async ([name]) => {
-        if (!name.endsWith('.code-workspace')) {
-            return;
-        }
-        await vscode.commands.executeCommand(
-            'vscode.removeFromRecentlyOpened',
-            vscode.Uri.joinPath(directory, name),
-        );
-    }));
+async function removeRecent(file: vscode.Uri): Promise<void> {
+    try { await vscode.commands.executeCommand('vscode.removeFromRecentlyOpened', file); }
+    catch { /* Optional recent-list maintenance must not block opening. */ }
 }
 
 async function isFolderWindowOpen(context: vscode.ExtensionContext, location: string): Promise<boolean> {
@@ -162,20 +147,7 @@ async function isFolderWindowOpen(context: vscode.ExtensionContext, location: st
 }
 
 function sameFolder(stored: string, location: string): boolean {
-    try {
-        const storedUri = stored.includes('://') ? vscode.Uri.parse(stored) : vscode.Uri.file(stored);
-        const target = toUri(location);
-        if (storedUri.scheme !== target.scheme) {
-            return false;
-        }
-        if (storedUri.scheme === 'file') {
-            return normalize(storedUri.fsPath).replace(/[\\/]+$/, '').toLowerCase()
-                === normalize(target.fsPath).replace(/[\\/]+$/, '').toLowerCase();
-        }
-        return storedUri.toString().toLowerCase() === target.toString().toLowerCase();
-    } catch {
-        return false;
-    }
+    try { return sameLocation(stored, location); } catch { return false; }
 }
 
 function toWorkspaceFolder(name: string, location: string): { name: string; path?: string; uri?: string } {
@@ -195,4 +167,23 @@ async function ensureDirectory(uri: vscode.Uri): Promise<void> {
         }
         throw error;
     }
+}
+
+async function cleanupWorkspaces(context: vscode.ExtensionContext, directory: vscode.Uri): Promise<void> {
+    try {
+        const bytes = await vscode.workspace.fs.readFile(vscode.Uri.joinPath(context.globalStorageUri, '..', 'storage.json'));
+        const state = JSON.parse(Buffer.from(bytes).toString('utf8')) as { windowsState?: WindowsState };
+        if (!state.windowsState || !Array.isArray(state.windowsState.openedWindows)) { return; }
+        const active = JSON.stringify(state.windowsState);
+        const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+        for (const [name, type] of await vscode.workspace.fs.readDirectory(directory)) {
+            if (type !== vscode.FileType.File || !/-(?:[a-f0-9]{12,16}(?:-[a-f0-9-]{36})?|[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})\.code-workspace$/.test(name)) { continue; }
+            const file = vscode.Uri.joinPath(directory, name);
+            if (active.includes(name) || vscode.workspace.workspaceFile?.toString() === file.toString()) { continue; }
+            const stat = await vscode.workspace.fs.stat(file);
+            if (stat.mtime >= cutoff) { continue; }
+            await removeRecent(file);
+            await vscode.workspace.fs.delete(file);
+        }
+    } catch { /* Unknown window state means no deletion; opening still proceeds. */ }
 }

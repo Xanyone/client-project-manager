@@ -41,6 +41,22 @@ suite('dashboard interactions', () => {
         dom.window.close();
     });
 
+    test('keeps import available in an empty catalog and persists only view preferences', () => {
+        const dom = new JSDOM('<body><input id=search><div id=metrics></div><div class=stage-tools><div id=filters></div><button data-action=add-client></button><button data-action=import></button><button data-action=export></button></div><div id=list></div></body>', { runScripts: 'outside-only' });
+        let saved: Record<string, unknown> | undefined;
+        Object.assign(dom.window, { acquireVsCodeApi: () => ({ getState() {}, setState(value: Record<string, unknown>) { saved = value; }, postMessage() {} }) });
+        dom.window.eval(readFileSync(resolve(__dirname, '../../media/dashboard.js'), 'utf8'));
+        const doc = dom.window.document;
+        assert.equal((doc.querySelector('.stage-tools') as HTMLElement).hidden, false);
+        assert.equal((doc.querySelector('[data-action=import]') as HTMLElement).hidden, false);
+        assert.equal((doc.querySelector('.stage-tools [data-action=add-client]') as HTMLElement).hidden, true);
+        assert.equal((doc.querySelector('[data-action=export]') as HTMLElement).hidden, true);
+        dom.window.dispatchEvent(new dom.window.MessageEvent('message', { data: { type: 'render', model: { clients: [] } } }));
+        assert.ok(saved);
+        assert.equal(Object.hasOwn(saved, 'model'), false);
+        dom.window.close();
+    });
+
     test('filters by custom module kinds without treating inherited object keys as kinds', () => {
         const dom = new JSDOM('<body><input id=search><div id=metrics></div><div class=stage-tools><div id=filters></div></div><div id=list></div></body>', { runScripts: 'outside-only' });
         Object.assign(dom.window, { acquireVsCodeApi: () => ({ getState: () => undefined, setState() {}, postMessage() {} }) });

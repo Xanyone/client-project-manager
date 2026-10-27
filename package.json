@@ -344,17 +344,18 @@
     "package": "npm run check-types && npm run lint && node esbuild.js --production",
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
-    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "pretest": "npm run compile-tests && npm run compile",
     "check-types": "tsc --noEmit",
-    "lint": "eslint src --max-warnings 0 && node --check media/dashboard.js",
+    "lint": "eslint src media/dashboard.js --max-warnings 0",
     "test": "vscode-test",
     "package:vsix": "vsce package --no-dependencies",
-    "test:unit": "npm run compile-tests && mocha --ui tdd out/test/catalog.test.js"
+    "test:unit": "npm run compile-tests && mocha --ui tdd out/test/catalog.test.js out/test/uniqueness.test.js out/test/dashboard.test.js"
   },
   "devDependencies": {
     "@types/jsdom": "^30.0.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "24.x",
+    "@types/proper-lockfile": "^4.1.4",
     "@types/sinon": "^22.0.2",
     "@types/vscode": "^1.140.0",
     "@vscode/test-cli": "^0.0.15",
@@ -382,5 +383,8 @@
   "bugs": {
     "url": "https://github.com/Xanyone/project-dashboard/issues"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "proper-lockfile": "^4.1.2"
+  }
 }

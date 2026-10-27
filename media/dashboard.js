@@ -20,6 +20,7 @@
     let kindFilter = previous.kindFilter || '';
     let missingOnly = previous.missingOnly === true;
     let folded = previous.folded && typeof previous.folded === 'object' ? previous.folded : {};
+    let searchTimer;
 
     const search = document.getElementById('search');
     const list = document.getElementById('list');
@@ -30,8 +31,8 @@
     search.value = query;
     search.addEventListener('input', function () {
         query = search.value;
-        persist();
-        render();
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(function () { persist(); render(); }, 100);
     });
     document.body.addEventListener('click', onClick);
     document.body.addEventListener('keydown', onKeydown);
@@ -57,7 +58,6 @@
 
     function persist() {
         vscode.setState({
-            model: model,
             query: query,
             kindFilter: kindFilter,
             missingOnly: missingOnly,
@@ -75,7 +75,10 @@
         renderFilters(kindsOf(model), kindCounts(searched));
         filters.hidden = clients.length === 0;
         if (tools) {
-            tools.hidden = clients.length === 0;
+            tools.hidden = false;
+            tools.querySelectorAll('[data-action=add-client], [data-action=export]').forEach(function (button) {
+                button.hidden = clients.length === 0;
+            });
         }
         list.replaceChildren();
         renderList(clients, searched, view);

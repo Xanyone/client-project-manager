@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { pathInspector } from './pathInspector.js';
 import { asNodeRef, type ProjectActions } from './actions.js';
 import { COMMANDS } from './constants.js';
 import type { DashboardPanel } from './dashboardPanel.js';
@@ -30,6 +31,7 @@ export function registerCommands(
             dashboard.show();
         }),
         vscode.commands.registerCommand(COMMANDS.refresh, () => {
+            pathInspector.clear();
             store.reload();
             tree.refresh();
             dashboard.update();

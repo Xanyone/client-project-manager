@@ -1,7 +1,7 @@
 import typescriptEslint from "typescript-eslint";
 
 export default [{
-    files: ["**/*.ts"],
+    files: ["src/**/*.ts", "media/**/*.js"],
 }, {
     plugins: {
         "@typescript-eslint": typescriptEslint.plugin,
@@ -19,6 +19,8 @@ export default [{
             format: ["camelCase", "PascalCase", "UPPER_CASE"],
         }],
 
+        "no-debugger": "error",
+        "no-eval": "error",
         curly: "warn",
         eqeqeq: "warn",
         "no-throw-literal": "warn",

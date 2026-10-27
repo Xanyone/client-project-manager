@@ -7,12 +7,10 @@ import {
     addProject,
     collectFolders,
     findNode,
-    hasSiblingName,
     mergeCatalog,
     parseCatalog,
     moveNode,
     nodeLabel,
-    parentOf,
     relocate,
     removeNode,
     renameNode,
@@ -22,8 +20,8 @@ import {
     setModulePath,
 } from './catalog.js';
 import { COLOR_PRESETS, CONFIG_SECTION, colorAt } from './constants.js';
-import { openFolders, openPath, revealPath } from './opener.js';
-import { inspectPath, isFilePath } from './paths.js';
+import { openFolders, openPath, revealPath, toUri } from './opener.js';
+import { pathInspector } from './pathInspector.js';
 import type { CatalogStore } from './store.js';
 import {
     type NodeRef,
@@ -37,7 +35,7 @@ export class ProjectActions {
             defaultUri: vscode.Uri.file('project-dashboard-backup.json'),
         });
         if (!uri) { return; }
-        await vscode.workspace.fs.writeFile(uri, Buffer.from(JSON.stringify(this.store.get(), null, 2), 'utf8'));
+        await vscode.workspace.fs.writeFile(uri, Buffer.from(await this.store.backup(), 'utf8'));
         void vscode.window.showInformationMessage(t("Catalog exported"));
     }
 
@@ -47,7 +45,7 @@ export class ProjectActions {
         });
         if (!uris?.[0]) { return; }
         const bytes = await vscode.workspace.fs.readFile(uris[0]);
-        const incoming = parseCatalog(JSON.parse(Buffer.from(bytes).toString('utf8').replace(/^\uFEFF/, '')));
+        const incoming = parseCatalog(JSON.parse(Buffer.from(bytes).toString('utf8').replace(/^\uFEFF/, '')), { allowDuplicates: true });
         if (await this.store.update(current => mergeCatalog(current, incoming))) {
             void vscode.window.showInformationMessage(t("Catalog imported and merged"));
         }
@@ -63,19 +61,16 @@ export class ProjectActions {
         if (!name) {
             return undefined;
         }
-        if (await this.rejectDuplicate(undefined, name)) {
-            return undefined;
+        let id: string | undefined;
+        if (await this.store.update(current => {
+            const created = addClient(current, { name, color: colorAt(current.clients.length) });
+            id = created.client.id;
+            return created.catalog;
+        })) {
+            void vscode.window.showInformationMessage(t('Added client "{0}"', name));
+            return id;
         }
-        const created = addClient(this.store.get(), {
-            name,
-            color: colorAt(this.store.get().clients.length),
-        });
-        if (!await this.store.update(created.catalog)) {
-            return undefined;
-        }
-        this.store.reload();
-        void vscode.window.showInformationMessage(t("Added client \"{0}\"", created.client.name));
-        return created.client.id;
+        return undefined;
     }
 
     async addProject(clientId?: string): Promise<void> {
@@ -87,17 +82,11 @@ export class ProjectActions {
         if (!name) {
             return;
         }
-        if (await this.rejectDuplicate({ type: 'client', id: resolvedClientId }, name)) {
-            return;
+        if (await this.store.update(current => addProject(current, resolvedClientId, {
+            name, color: colorAt(this.projectCount(resolvedClientId)),
+        }).catalog)) {
+            void vscode.window.showInformationMessage(t('Added project "{0}"', name));
         }
-        const created = addProject(this.store.get(), resolvedClientId, {
-            name,
-            color: colorAt(this.projectCount(resolvedClientId)),
-        });
-        if (!await this.store.update(created.catalog)) {
-            return;
-        }
-        void vscode.window.showInformationMessage(t("Added project \"{0}\"", created.project.name));
     }
 
     async addModule(projectId?: string): Promise<void> {
@@ -115,7 +104,7 @@ export class ProjectActions {
         if (!uris?.[0]) {
             return;
         }
-        await this.addOneModule(resolvedProjectId, uris[0].fsPath);
+        await this.addOneModule(resolvedProjectId, folderLocation(uris[0]));
     }
 
     async addDroppedFolders(target: NodeRef | undefined, uris: readonly vscode.Uri[]): Promise<void> {
@@ -157,9 +146,6 @@ export class ProjectActions {
         const current = nodeLabel(this.store.get(), resolved);
         const name = await askText(t("Rename"), undefined, current);
         if (!name || name === current) {
-            return;
-        }
-        if (await this.rejectDuplicate(parentOf(this.store.get(), resolved), name, resolved.id)) {
             return;
         }
         await this.store.update(current => renameNode(current, resolved, name));
@@ -325,7 +311,7 @@ export class ProjectActions {
         if (located?.type !== 'module') {
             return;
         }
-        if (isFilePath(located.module.path) && !inspectPath(located.module.path).exists) {
+        if (!(await pathInspector.inspect(located.module.path)).exists) {
             const choice = await vscode.window.showWarningMessage(
                 t("Path does not exist: {0}", located.module.path),
                 t("Open anyway"),
@@ -418,12 +404,13 @@ export class ProjectActions {
     }
 
     async moveByDrop(source: NodeRef, target: NodeRef): Promise<void> {
-        const result = relocate(this.store.get(), source, target);
-        if (!result.moved) {
-            void vscode.window.showWarningMessage(t("Cannot drop here. Reorder clients, move projects to clients or projects, and move modules to projects or modules."));
-            return;
-        }
-        await this.store.update(result.catalog);
+        await this.store.update(current => {
+            const result = relocate(current, source, target);
+            if (!result.moved) {
+                throw new Error(t("Cannot drop here. Reorder clients, move projects to clients or projects, and move modules to projects or modules."));
+            }
+            return result.catalog;
+        });
     }
 
     private async addOneModule(projectId: string, folder: string): Promise<void> {
@@ -435,13 +422,7 @@ export class ProjectActions {
         if (!kind) {
             return;
         }
-        if (await this.rejectDuplicate({ type: 'project', id: projectId }, name)) {
-            return;
-        }
-        const created = addModule(this.store.get(), projectId, { name, kind, path: folder });
-        if (!await this.store.update(created.catalog)) {
-            return;
-        }
+        await this.store.update(current => addModule(current, projectId, { name, kind, path: folder }).catalog);
     }
 
     private async projectIdForDrop(target: NodeRef | undefined, firstFolder: string): Promise<string | undefined> {
@@ -488,17 +469,13 @@ export class ProjectActions {
         if (!name) {
             return undefined;
         }
-        if (await this.rejectDuplicate({ type: 'client', id: clientId }, name)) {
-            return undefined;
-        }
-        const created = addProject(this.store.get(), clientId, {
-            name,
-            color: colorAt(this.projectCount(clientId)),
-        });
-        if (!await this.store.update(created.catalog)) {
-            return undefined;
-        }
-        return created.project.id;
+        let id: string | undefined;
+        if (await this.store.update(current => {
+            const created = addProject(current, clientId, { name, color: colorAt(this.projectCount(clientId)) });
+            id = created.project.id;
+            return created.catalog;
+        })) { return id; }
+        return undefined;
     }
 
     private async pickClient(allowCreate: boolean): Promise<string | undefined> {
@@ -543,9 +520,9 @@ export class ProjectActions {
             canSelectFolders: true,
             canSelectFiles: false,
             canSelectMany: false,
-            defaultUri: current && isFilePath(current) ? vscode.Uri.file(current) : undefined,
+            defaultUri: current ? toUri(current) : undefined,
         });
-        return uris?.[0]?.fsPath;
+        return uris?.[0] ? folderLocation(uris[0]) : undefined;
     }
 
     private async resolve(ref?: NodeRef, expected?: NodeRef['type']): Promise<NodeRef | undefined> {
@@ -597,14 +574,6 @@ export class ProjectActions {
         return located?.type === 'module' ? located : undefined;
     }
 
-    private async rejectDuplicate(parent: NodeRef | undefined, name: string, ignoreId?: string): Promise<boolean> {
-        if (!hasSiblingName(this.store.get(), parent, name, ignoreId)) {
-            return false;
-        }
-        const choice = await vscode.window.showWarningMessage(t("An item named \"{0}\" already exists in this group. Continue?", name), { modal: true }, t("Continue"));
-        return choice !== t("Continue");
-    }
-
     private projectCount(clientId: string): number {
         return this.store.get().clients.find(client => client.id === clientId)?.projects.length ?? 0;
     }
@@ -619,6 +588,10 @@ export function asNodeRef(value: unknown): NodeRef | undefined {
         return isNodeRef(ref) ? ref : undefined;
     }
     return undefined;
+}
+
+function folderLocation(uri: vscode.Uri): string {
+    return uri.scheme === 'file' ? uri.fsPath : uri.toString();
 }
 
 async function askText(prompt: string, placeHolder?: string, value?: string): Promise<string | undefined> {

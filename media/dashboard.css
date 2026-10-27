@@ -593,7 +593,8 @@ button.ghost:hover {
 }
 
 @media (hover: none) {
-    .menu {
+    .menu,
+    .module-window {
         opacity: 1;
         pointer-events: auto;
     }

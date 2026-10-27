@@ -1,6 +1,6 @@
 import { t } from './i18n.js';
 import { randomUUID } from 'node:crypto';
-import { uniqueName } from './paths.js';
+import { isFilePath, locationKey, nameKey, sameLocation, uniqueName } from './paths.js';
 import {
     CATALOG_VERSION,
     type Catalog,
@@ -32,7 +32,7 @@ export function normalizeColor(value: unknown): string | undefined {
     return hex;
 }
 
-export function parseCatalog(input: unknown): Catalog {
+export function parseCatalog(input: unknown, options: { allowDuplicates?: boolean } = {}): Catalog {
     if (!input || typeof input !== 'object' || Array.isArray(input)) {
         throw new Error(t("Catalog must be a JSON object"));
     }
@@ -40,19 +40,41 @@ export function parseCatalog(input: unknown): Catalog {
     if (record.version !== undefined && record.version !== CATALOG_VERSION) {
         throw new Error(t("Unsupported catalog version: {0}", String(record.version)));
     }
-    if (record.clients === undefined) {
-        return emptyCatalog();
-    }
     if (!Array.isArray(record.clients)) {
         throw new Error(t("clients must be an array"));
     }
 
     const seen = new Set<string>();
     const clients = record.clients.map(client => parseClient(client, seen));
+    if (!options.allowDuplicates) {
+        checkSiblings(clients);
+        for (const client of clients) {
+            checkSiblings(client.projects);
+            for (const project of client.projects) {
+                checkSiblings(project.modules);
+                const paths = new Set<string>();
+                for (const module of project.modules) {
+                    const key = locationKey(module.path);
+                    if (paths.has(key)) { throw new Error(t("This folder is already in this project: {0}", module.path)); }
+                    paths.add(key);
+                }
+            }
+        }
+    }
     return { version: CATALOG_VERSION, clients };
 }
 
+function checkSiblings(items: readonly { name: string }[]): void {
+    const names = new Set<string>();
+    for (const item of items) {
+        const key = nameKey(item.name);
+        if (names.has(key)) { throw new Error(t("An item named \"{0}\" already exists in this group", item.name)); }
+        names.add(key);
+    }
+}
+
 export function addClient(catalog: Catalog, input: NamedInput): { catalog: Catalog; client: ClientEntry } {
+    assertUniqueName(catalog, undefined, input.name);
     const client: ClientEntry = {
         id: randomUUID(),
         name: requireName(input.name),
@@ -71,6 +93,7 @@ export function addProject(
     clientId: string,
     input: NamedInput,
 ): { catalog: Catalog; project: ProjectEntry } {
+    assertUniqueName(catalog, { type: 'client', id: clientId }, input.name);
     const project: ProjectEntry = {
         id: randomUUID(),
         name: requireName(input.name),
@@ -97,6 +120,8 @@ export function addModule(
     projectId: string,
     input: ModuleInput,
 ): { catalog: Catalog; module: ModuleEntry } {
+    assertUniqueName(catalog, { type: 'project', id: projectId }, input.name);
+    assertUniquePath(catalog, projectId, input.path);
     const module: ModuleEntry = {
         id: randomUUID(),
         name: requireName(input.name),
@@ -124,6 +149,7 @@ export function addModule(
 
 export function renameNode(catalog: Catalog, ref: NodeRef, name: string): Catalog {
     const nextName = requireName(name);
+    assertUniqueName(catalog, parentOf(catalog, ref), nextName, ref.id);
     return mapNode(catalog, ref, node => ({ ...node, name: nextName }));
 }
 
@@ -144,14 +170,16 @@ export function setModulePath(catalog: Catalog, ref: NodeRef, modulePath: string
         throw new Error(t("Only modules can have a path"));
     }
     const path = requirePath(modulePath);
-    return mapNode(catalog, ref, node => ({ ...node, path }));
+    const parent = parentOf(catalog, ref);
+    if (parent) { assertUniquePath(catalog, parent.id, path, ref.id); }
+    return mapModule(catalog, ref, node => ({ ...node, path }));
 }
 
 export function setModuleKind(catalog: Catalog, ref: NodeRef, kind: ModuleKind): Catalog {
     if (ref.type !== 'module') {
         throw new Error(t("Only modules can have a type"));
     }
-    return mapNode(catalog, ref, node => ({ ...node, kind: requireKind(kind) }));
+    return mapModule(catalog, ref, node => ({ ...node, kind: requireKind(kind) }));
 }
 
 export function removeNode(catalog: Catalog, ref: NodeRef): Catalog {
@@ -272,22 +300,22 @@ export function hasSiblingName(
     name: string,
     ignoreId?: string,
 ): boolean {
-    const target = name.trim().toLowerCase();
+    const target = nameKey(name);
     if (!target) {
         return false;
     }
     if (!parent) {
-        return catalog.clients.some(client => client.id !== ignoreId && client.name.trim().toLowerCase() === target);
+        return catalog.clients.some(client => client.id !== ignoreId && nameKey(client.name) === target);
     }
     if (parent.type === 'client') {
         const client = catalog.clients.find(item => item.id === parent.id);
-        return Boolean(client?.projects.some(project => project.id !== ignoreId && project.name.trim().toLowerCase() === target));
+        return Boolean(client?.projects.some(project => project.id !== ignoreId && nameKey(project.name) === target));
     }
     if (parent.type === 'project') {
         const located = findNode(catalog, parent);
         return Boolean(
             located?.type === 'project'
-            && located.project.modules.some(module => module.id !== ignoreId && module.name.trim().toLowerCase() === target),
+            && located.project.modules.some(module => module.id !== ignoreId && nameKey(module.name) === target),
         );
     }
     return false;
@@ -345,7 +373,7 @@ export function collectFolders(catalog: Catalog, ref: NodeRef): FolderLocation[]
             folders.push({ name: `${project.name} - ${module.name}`, location: module.path });
         }
     }
-    return folders;
+    return deduplicateFolders(folders);
 }
 
 export function mergeCatalog(base: Catalog, incoming: Catalog): Catalog {
@@ -376,7 +404,7 @@ export function mergeCatalog(base: Catalog, incoming: Catalog): Catalog {
             }
             for (const incomingModule of incomingProject.modules) {
                 const duplicated = incomingModule.path
-                    && project.modules.some(module => module.path === incomingModule.path);
+                    && project.modules.some(module => sameLocation(module.path, incomingModule.path));
                 if (duplicated) {
                     continue;
                 }
@@ -462,7 +490,8 @@ function asRecord(input: unknown, label: string): Record<string, unknown> {
 }
 
 function uniqueId(value: unknown, seen: Set<string>): string {
-    if (typeof value === 'string' && value.trim() && !seen.has(value)) {
+    if (typeof value === 'string' && value.trim()) {
+        if (seen.has(value)) { throw new Error(t("Duplicate item ID: {0}", value)); }
         seen.add(value);
         return value;
     }
@@ -484,6 +513,10 @@ function requirePath(modulePath: string): string {
     if (!trimmed) {
         throw new Error(t("Path cannot be empty"));
     }
+    if (!isFilePath(trimmed) && !/^(file|vscode-remote):\/\//i.test(trimmed)) {
+        throw new Error(t("Use an absolute folder path or a file/remote URI"));
+    }
+    try { locationKey(trimmed); } catch { throw new Error(t("Use an absolute folder path or a file/remote URI")); }
     return trimmed;
 }
 
@@ -501,7 +534,7 @@ function requireKind(kind: string): ModuleKind {
 }
 
 function sameName(left: string, right: string): boolean {
-    return left.trim().toLowerCase() === right.trim().toLowerCase();
+    return nameKey(left) === nameKey(right);
 }
 
 function cloneClient(client: ClientEntry): ClientEntry {
@@ -514,30 +547,30 @@ function cloneClient(client: ClientEntry): ClientEntry {
     };
 }
 
-function mapNode<T extends { id: string }>(
+function mapNode(
     catalog: Catalog,
     ref: NodeRef,
-    update: (node: T) => T,
+    update: <T extends ClientEntry | ProjectEntry | ModuleEntry>(node: T) => T,
 ): Catalog {
     let found = false;
     const clients = catalog.clients.map(client => {
         if (ref.type === 'client' && client.id === ref.id) {
             found = true;
-            return update(client as unknown as T) as unknown as ClientEntry;
+            return update(client);
         }
         return {
             ...client,
             projects: client.projects.map(project => {
                 if (ref.type === 'project' && project.id === ref.id) {
                     found = true;
-                    return update(project as unknown as T) as unknown as ProjectEntry;
+                    return update(project);
                 }
                 return {
                     ...project,
                     modules: project.modules.map(module => {
                         if (ref.type === 'module' && module.id === ref.id) {
                             found = true;
-                            return update(module as unknown as T) as unknown as ModuleEntry;
+                            return update(module);
                         }
                         return module;
                     }),
@@ -549,6 +582,15 @@ function mapNode<T extends { id: string }>(
         throw new Error(t("Item to edit not found"));
     }
     return { ...catalog, clients };
+}
+
+function mapModule(catalog: Catalog, ref: NodeRef, update: (module: ModuleEntry) => ModuleEntry): Catalog {
+    if (!findNode(catalog, ref)) { throw new Error(t("Item to edit not found")); }
+    return { ...catalog, clients: catalog.clients.map(client => ({ ...client,
+        projects: client.projects.map(project => ({ ...project,
+            modules: project.modules.map(module => module.id === ref.id ? update(module) : module),
+        })),
+    })) };
 }
 
 function moveBy<T extends { id: string }>(items: T[], id: string, direction: 'up' | 'down'): T[] {
@@ -608,6 +650,7 @@ function extractModule(catalog: Catalog, moduleId: string): { catalog: Catalog; 
 }
 
 function insertProject(catalog: Catalog, clientId: string, project: ProjectEntry, beforeId?: string): Catalog {
+    assertUniqueName(catalog, { type: 'client', id: clientId }, project.name);
     let found = false;
     const clients = catalog.clients.map(client => {
         if (client.id !== clientId) {
@@ -626,6 +669,8 @@ function insertProject(catalog: Catalog, clientId: string, project: ProjectEntry
 }
 
 function insertModule(catalog: Catalog, projectId: string, module: ModuleEntry, beforeId?: string): Catalog {
+    assertUniqueName(catalog, { type: 'project', id: projectId }, module.name);
+    assertUniquePath(catalog, projectId, module.path);
     let found = false;
     const clients = catalog.clients.map(client => ({
         ...client,
@@ -644,4 +689,27 @@ function insertModule(catalog: Catalog, projectId: string, module: ModuleEntry, 
         throw new Error(t("Destination project not found"));
     }
     return { ...catalog, clients };
+}
+
+function assertUniqueName(catalog: Catalog, parent: NodeRef | undefined, name: string, ignoreId?: string): void {
+    if (hasSiblingName(catalog, parent, name, ignoreId)) {
+        throw new Error(t("An item named \"{0}\" already exists in this group", name.trim()));
+    }
+}
+
+function assertUniquePath(catalog: Catalog, projectId: string, path: string, ignoreId?: string): void {
+    const located = findNode(catalog, { type: 'project', id: projectId });
+    if (located?.type === 'project' && located.project.modules.some(module => module.id !== ignoreId && sameLocation(module.path, path))) {
+        throw new Error(t("This folder is already in this project: {0}", path));
+    }
+}
+
+export function deduplicateFolders(folders: readonly FolderLocation[]): FolderLocation[] {
+    const seen = new Set<string>();
+    return folders.filter(folder => {
+        const key = locationKey(folder.location);
+        if (seen.has(key)) { return false; }
+        seen.add(key);
+        return true;
+    });
 }

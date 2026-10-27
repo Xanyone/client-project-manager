@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import { randomBytes } from 'node:crypto';
 import type { ProjectActions } from './actions.js';
 import { DEFAULT_KIND_COLOR, CONFIG_SECTION, colorAt } from './constants.js';
-import { inspectPath } from './paths.js';
+import { pathInspector } from './pathInspector.js';
 import type { CatalogStore } from './store.js';
 import {
     type DashboardModel,
@@ -12,6 +12,7 @@ import {
 } from './types.js';
 
 export class DashboardPanel implements vscode.Disposable {
+    private generation = 0;
     private panel: vscode.WebviewPanel | undefined;
     private readonly configurationListener: vscode.Disposable;
 
@@ -55,8 +56,15 @@ export class DashboardPanel implements vscode.Disposable {
     }
 
     update(): void {
-        if (this.panel) {
-            void this.panel.webview.postMessage({ type: 'render', model: this.model() });
+        const panel = this.panel;
+        const generation = ++this.generation;
+        if (panel) {
+            void this.model().then(model => {
+                if (panel === this.panel && generation === this.generation) {
+                    return panel.webview.postMessage({ type: 'render', model });
+                }
+                return undefined;
+            }).catch(error => { void vscode.window.showErrorMessage(String(error)); });
         }
     }
 
@@ -65,9 +73,13 @@ export class DashboardPanel implements vscode.Disposable {
         this.configurationListener.dispose();
     }
 
-    private model(): DashboardModel {
+    private async model(): Promise<DashboardModel> {
+        const catalog = this.store.get();
+        const statuses = new Map(await Promise.all(catalog.clients.flatMap(client => client.projects.flatMap(project =>
+            project.modules.map(async module => [module.path, await pathInspector.inspect(module.path)] as const),
+        ))));
         const config = vscode.workspace.getConfiguration(CONFIG_SECTION);
-        const kinds = [...new Set(this.store.get().clients.flatMap(client =>
+        const kinds = [...new Set(catalog.clients.flatMap(client =>
             client.projects.flatMap(project => project.modules.map(module => module.kind)),
         ))];
         return {
@@ -78,7 +90,7 @@ export class DashboardPanel implements vscode.Disposable {
                 label: kind,
                 color: DEFAULT_KIND_COLOR,
             })),
-            clients: this.store.get().clients.map((client, clientIndex) => ({
+            clients: catalog.clients.map((client, clientIndex) => ({
                 id: client.id,
                 name: client.name,
                 description: client.description ?? '',
@@ -89,7 +101,7 @@ export class DashboardPanel implements vscode.Disposable {
                     description: project.description ?? '',
                     color: project.color ?? colorAt(projectIndex + 1),
                     modules: project.modules.map(module => {
-                        const inspected = inspectPath(module.path);
+                        const inspected = statuses.get(module.path)!;
                         return {
                             id: module.id,
                             name: module.name,

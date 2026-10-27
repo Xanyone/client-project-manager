@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import type { ProjectActions } from './actions.js';
 import { findNode, parentOf } from './catalog.js';
 import { TREE_MIME } from './constants.js';
-import { inspectPath } from './paths.js';
+import { pathInspector } from './pathInspector.js';
 import type { CatalogStore } from './store.js';
 import { type NodeRef, isNodeRef } from './types.js';
 
@@ -42,22 +42,22 @@ export class ProjectTreeProvider implements vscode.TreeDataProvider<ProjectTreeI
         return element;
     }
 
-    getChildren(element?: ProjectTreeItem): ProjectTreeItem[] {
+    async getChildren(element?: ProjectTreeItem): Promise<ProjectTreeItem[]> {
         const catalog = this.store.get();
         if (!element) {
-            return catalog.clients.map(client => this.createItem({ type: 'client', id: client.id }));
+            return Promise.all(catalog.clients.map(client => this.createItem({ type: 'client', id: client.id })));
         }
         const located = findNode(catalog, element.ref);
         if (located?.type === 'client') {
-            return located.client.projects.map(project => this.createItem({ type: 'project', id: project.id }));
+            return Promise.all(located.client.projects.map(project => this.createItem({ type: 'project', id: project.id })));
         }
         if (located?.type === 'project') {
-            return located.project.modules.map(module => this.createItem({ type: 'module', id: module.id }));
+            return Promise.all(located.project.modules.map(module => this.createItem({ type: 'module', id: module.id })));
         }
         return [];
     }
 
-    getParent(element: ProjectTreeItem): ProjectTreeItem | undefined {
+    async getParent(element: ProjectTreeItem): Promise<ProjectTreeItem | undefined> {
         const parent = parentOf(this.store.get(), element.ref);
         return parent ? this.createItem(parent) : undefined;
     }
@@ -67,6 +67,11 @@ export class ProjectTreeProvider implements vscode.TreeDataProvider<ProjectTreeI
     }
 
     async handleDrop(target: ProjectTreeItem | undefined, dataTransfer: vscode.DataTransfer): Promise<void> {
+        try { await this.drop(target, dataTransfer); }
+        catch (error) { void vscode.window.showErrorMessage(String(error)); }
+    }
+
+    private async drop(target: ProjectTreeItem | undefined, dataTransfer: vscode.DataTransfer): Promise<void> {
         const dragged = await readDraggedRef(dataTransfer);
         if (dragged) {
             if (!target) {
@@ -82,7 +87,7 @@ export class ProjectTreeProvider implements vscode.TreeDataProvider<ProjectTreeI
         }
     }
 
-    private createItem(ref: NodeRef): ProjectTreeItem {
+    private async createItem(ref: NodeRef): Promise<ProjectTreeItem> {
         const located = findNode(this.store.get(), ref);
         if (located?.type === 'client') {
             const item = new ProjectTreeItem(ref, located.client.name, vscode.TreeItemCollapsibleState.Expanded);
@@ -105,7 +110,7 @@ export class ProjectTreeProvider implements vscode.TreeDataProvider<ProjectTreeI
         if (located?.type === 'module') {
             const item = new ProjectTreeItem(ref, located.module.name, vscode.TreeItemCollapsibleState.None);
             item.iconPath = new vscode.ThemeIcon('folder');
-            const inspected = inspectPath(located.module.path);
+            const inspected = await pathInspector.inspect(located.module.path);
             item.description = inspected.exists
                 ? located.module.kind
                 : t("{0} · Path does not exist", located.module.kind);

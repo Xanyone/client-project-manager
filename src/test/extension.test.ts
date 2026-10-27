@@ -22,7 +22,7 @@ suite('extension host', () => {
         }
     });
 
-    test('opens the dashboard by default and keeps the sidebar opt-in', async () => {
+    test('opens the dashboard and enables the sidebar by default', async () => {
         const extension = vscode.extensions.getExtension('Xanyone.client-project-dashboard')!;
         await extension.activate();
         const configuration = vscode.workspace.getConfiguration('clientProjectDashboard');
