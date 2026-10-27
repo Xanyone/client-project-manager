@@ -1,4 +1,9 @@
-客户项目仪表盘 / Client Project Dashboard v0.3.4
+客户项目仪表盘 / Client Project Dashboard v0.3.5
+
+- 目录卡片在宽窗口每行三张，卡片更宽敞；窄窗口自适应两列或一列。
+- 修复“选择窗口”被编辑按钮遮挡，改为独立的底部操作栏。
+
+Folder cards now use three columns in wide windows, with more space and responsive two-column or single-column layouts. Window selection and editing have separate controls in a shared footer, preventing overlap.
 
 - 支持中英文国际化，语言跟随 VS Code，覆盖仪表盘、命令、设置和原生弹窗。
 - 默认在空窗口自动打开仪表盘，分组侧栏默认开启；使用 `clientProjectDashboard.showSidebar` 可控制侧栏。

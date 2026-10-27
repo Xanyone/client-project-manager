@@ -243,7 +243,12 @@
         if (model.showPath) {
             open.append(el('span', 'module-path', module.path || ''));
         }
-        card.append(open, actionButton(t("Choose window"), 'text-action module-window', 'open-window', module.id, 'module'), menuButton(t("Edit folder"), 'edit', module.id, 'module'));
+        const actions = el('div', 'module-actions');
+        actions.append(
+            actionButton(t("Choose window"), 'text-action module-window', 'open-window', module.id, 'module'),
+            menuButton(t("Edit folder"), 'edit', module.id, 'module'),
+        );
+        card.append(open, actions);
         return card;
     }
 

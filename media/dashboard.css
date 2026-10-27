@@ -580,43 +580,30 @@ button.ghost:hover {
 }
 
 .module-window {
-    align-self: flex-start;
-    margin-left: auto;
-    opacity: 0;
-    pointer-events: none;
-}
-
-.module-card:hover .module-window,
-.module-card:focus-within .module-window {
-    opacity: 1;
-    pointer-events: auto;
+    min-width: 0;
+    white-space: normal;
 }
 
 @media (hover: none) {
-    .menu,
-    .module-window {
+    .menu {
         opacity: 1;
         pointer-events: auto;
     }
 }
 
 .module-board {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding: 12px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    padding: 16px;
 }
 
 .module-card {
     --tone: var(--signal);
-    position: relative;
     display: flex;
-    flex: 1 1 220px;
-    width: 240px;
-    max-width: 320px;
+    flex-direction: column;
     min-width: 0;
-    min-height: 108px;
+    min-height: 160px;
     overflow: hidden;
     border: 1px solid var(--line);
     border-radius: var(--radius);
@@ -640,7 +627,7 @@ button.ghost:hover {
     align-items: flex-start;
     gap: 6px;
     min-width: 0;
-    padding: 12px 28px 12px 12px;
+    padding: 16px;
 }
 
 .module-kind {
@@ -689,11 +676,23 @@ button.ghost:hover {
     max-width: 100%;
 }
 
-.module-card .menu {
-    position: absolute;
-    top: 8px;
-    right: 6px;
-    background: var(--card);
+.module-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 4px 12px 10px;
+}
+
+.module-actions .menu {
+    width: 28px;
+    height: 28px;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.module-board > .module-empty {
+    grid-column: 1 / -1;
 }
 
 .tag {
@@ -805,8 +804,14 @@ button.ghost:hover {
         max-width: 70%;
     }
 
-    .module-card {
-        max-width: none;
+    .module-board {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .module-board {
+        grid-template-columns: minmax(0, 1fr);
     }
 }
 
