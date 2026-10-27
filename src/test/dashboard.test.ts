@@ -101,7 +101,7 @@ suite('dashboard interactions', () => {
         dom.window.close();
     });
 
-    test('disables empty project opening and keeps project actions separate from folding', () => {
+    test('keeps project actions separate from folding without an open-project button', () => {
         const dom = new JSDOM('<body><input id=search><div id=metrics></div><div class=stage-tools><div id=filters></div></div><div id=list></div></body>', { runScripts: 'outside-only' });
         const messages: Array<{ type: string; id: string; nodeType: string }> = [];
         Object.assign(dom.window, { acquireVsCodeApi: () => ({ getState() {}, setState() {}, postMessage(message: { type: string; id: string; nodeType: string }) { messages.push(message); } }) });
@@ -112,16 +112,16 @@ suite('dashboard interactions', () => {
                 { id: 'full', name: 'Full', modules: [{ id: 'm', name: 'Folder', kind: 'builtin:other', kindLabel: 'Other', path: 'C:/folder', exists: true }] },
             ] }] } } }));
             const doc = dom.window.document;
-            const empty = doc.querySelector('[data-action=open][data-id=empty]') as HTMLButtonElement;
-            assert.equal(empty.disabled, true);
-            const before = messages.length;
-            empty.click();
-            assert.equal(messages.length, before);
-            (doc.querySelector('[data-action=open][data-id=full]') as HTMLElement).click();
-            assert.equal(messages.at(-1)?.type, 'open');
-            assert.equal(messages.at(-1)?.id, 'full');
+            assert.equal(doc.querySelector('[data-action=open][data-node-type=project]'), null);
+            assert.equal(doc.querySelectorAll('.project-card > .fold-head [data-action=add-module]').length, 2);
+            assert.equal(doc.querySelectorAll('.project-card > .fold-head [data-action=edit]').length, 2);
             assert.equal(doc.querySelectorAll('.project-card.open').length, 2);
             assert.equal(doc.querySelectorAll('.project-card [data-action=workspace]').length, 0);
+            (doc.querySelector('[data-action=add-module][data-id=empty]') as HTMLElement).click();
+            assert.equal(messages.at(-1)?.type, 'add-module');
+            assert.equal(messages.at(-1)?.id, 'empty');
+            (doc.querySelector('[data-action=toggle-fold][data-id=empty]') as HTMLElement).click();
+            assert.equal(doc.querySelectorAll('.project-card.open').length, 1);
         } finally { dom.window.close(); }
     });
 });

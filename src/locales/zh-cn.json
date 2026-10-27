@@ -96,7 +96,6 @@
   "Missing only": "只看缺失",
   "Edit client": "编辑客户",
   "No projects yet": "还没有项目",
-  "Open project": "打开项目",
   "Choose window": "选择窗口",
   "Add folder": "添加目录",
   "Edit project": "编辑项目",
@@ -171,7 +170,5 @@
   "Folder types": "目录类型",
   "No custom folder types configured.": "尚未配置自定义目录类型。",
   "Remove a type from the picker; folder assignments will not change": "从选项中移除此类型，不修改目录的类型指派",
-  "Add a folder before opening this project": "请先添加目录，再打开项目",
-  "Open all folders using your default window preference": "按默认窗口偏好打开项目中的全部目录",
   "For example: Mobile, Worker, or Infrastructure": "例如：移动端、任务队列、基础设施"
 }

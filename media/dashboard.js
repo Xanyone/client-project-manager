@@ -184,11 +184,7 @@
         }
         toggle.append(el('span', 'project-count', countMessage("{0} folder", "{0} folders", project.modules.length)));
         const actions = el('div', 'fold-actions');
-        const openProject = actionButton(t("Open project"), 'action-button primary', 'open', project.id, 'project');
-        openProject.disabled = project.modules.length === 0;
-        openProject.title = openProject.disabled ? t("Add a folder before opening this project") : t("Open all folders using your default window preference");
         actions.append(
-            openProject,
             actionButton(t("Add folder"), 'action-button', 'add-module', project.id, 'project'),
             menuButton(t("Edit project"), 'edit', project.id, 'project'),
         );

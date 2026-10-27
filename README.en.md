@@ -36,7 +36,7 @@ Use **Folder types** on the dashboard, **Manage folder types** in the sidebar's 
 
 Preferences live in user settings; catalog backups contain folder type assignments, but do not include the saved list or default preference. Built-ins use stable `builtin:frontend`, `builtin:backend`, `builtin:api`, `builtin:config`, `builtin:docs`, `builtin:tests`, `builtin:scripts`, and `builtin:other` IDs. Their labels follow VS Code's language.
 
-Project headings expand or collapse without a block hover background. The primary **Open project** button follows your window preference; **Add folder** is secondary, and edit controls stay visible. **Open as workspace** is available in the edit menu. Empty projects disable opening until you add a folder.
+Project headings expand or collapse without a block hover background. Project actions keep **Add folder** and the edit menu; **Open as workspace** remains available in that menu. Folder cards continue to open individual folders.
 
 Data stays in local extension storage by default. **Back up** exports JSON; **Import** merges a backup by client/project name and skips duplicate module paths. Backups contain your local paths and descriptions. Switching storage migrates the current catalog and keeps a local backup of the destination's previous contents. Paths may need updating when syncing to another computer.
 
