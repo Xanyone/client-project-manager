@@ -2,58 +2,21 @@
 
 [简体中文](README.md)
 
-Organize local folders by **client → project → module**, then open them from a dashboard.
+Organize local work by **client → project → folder** and quickly find and open it in VS Code.
 
-## Install and use
+## Features
 
-Download a `.vsix` from [GitHub Releases](https://github.com/Xanyone/project-dashboard/releases/latest) and choose **Install from VSIX** in VS Code's Extensions menu. Requires VS Code 1.140.0 or later.
+- Manage clients, projects, and folders in the dashboard or sidebar
+- Search names, types, descriptions, and paths; filter by folder type or missing paths
+- Open an individual folder or open a client's or project's folders as a multi-root workspace
+- Reorder items by dragging, or drag folders into the sidebar
+- Add colors and descriptions, and assign built-in or custom folder types
+- Import and export catalogs for backup or migration
 
-The dashboard opens automatically in an empty window by default. Existing workspaces are not forced to switch views. Press `Ctrl+Alt+G` (`Cmd+Alt+G` on macOS) or run **Client Projects: Open dashboard** to open it again.
+## Use
 
-Add a client, add a project, then select a folder to add a module. Choose a built-in or custom folder type. Search by name, type, description, or path; filter by type or missing paths. Click a folder to open it, choose a window from its card, or open an entire project as a multi-root workspace. Hold Ctrl/Cmd to invert the configured window behavior.
+Add a client, create a project under it, then add local folders to that project. Select a folder card to open it. Use **Open as workspace** on a client or project to open multiple folders together. Search, filter, and collapse groups in the dashboard.
 
-The grouping sidebar is enabled by default. If its activity bar icon is hidden, enable `clientProjectDashboard.showSidebar` and reload the window.
+The dashboard opens automatically in an empty window. You can also press `Ctrl+Alt+G` (`Cmd+Alt+G` on macOS) or run **Client Projects: Open dashboard** from the Command Palette.
 
-The interface follows VS Code's display language. Chinese locales use Simplified Chinese; other locales use English. User names, descriptions, paths, and custom module types remain unchanged.
-
-## Settings
-
-| Setting | Default | Purpose |
-| --- | --- | --- |
-| `clientProjectDashboard.openOnStartup` | `emptyWindow` | `never`, `emptyWindow`, or `always`; existing explicit settings are preserved |
-| `clientProjectDashboard.showSidebar` | `true` | Show the grouping sidebar |
-| `clientProjectDashboard.openInNewWindow` | `false` | Open modules in a new window |
-| `clientProjectDashboard.showPath` | `true` | Show paths on folder cards |
-| `clientProjectDashboard.storage` | `globalState` | Use `settings` to store the catalog in user settings for Settings Sync |
-| `clientProjectDashboard.folderTypes` | `[]` | Saved custom folder types |
-| `clientProjectDashboard.defaultFolderType` | `builtin:other` | Type shown first when adding a folder |
-
-## Folder types
-
-Choose Frontend, Backend, API, Config, Docs, Tests, Scripts, or Other when adding a folder or editing its type. **Custom type…** saves a new name to the current custom type configuration for reuse. Choices come only from built-ins and this configuration; old catalog entries and cached models do not add choices. Custom names are case-sensitive and keep their original spelling.
-
-Use **Folder types** on the dashboard, **Manage folder types** in the sidebar's More Actions menu, or **Client Projects: Manage folder types** in the Command Palette to save custom choices, set a default, or remove saved choices. The default is first when adding; a configured current type is first when editing. Esc cancels without changing the folder. Removing a choice removes it from the picker without rewriting folder assignments; removing the saved default resets it to Other. Unconfigured defaults also use Other.
-
-Preferences live in user settings; catalog backups contain folder type assignments, but do not include the saved list or default preference. Built-ins use stable `builtin:frontend`, `builtin:backend`, `builtin:api`, `builtin:config`, `builtin:docs`, `builtin:tests`, `builtin:scripts`, and `builtin:other` IDs. Their labels follow VS Code's language.
-
-Project headings expand or collapse without a block hover background. Project actions keep **Add folder** and the edit menu; **Open as workspace** remains available in that menu. Folder cards continue to open individual folders.
-
-Data stays in local extension storage by default. **Back up** exports JSON; **Import** merges a backup by client/project name and skips duplicate module paths. Backups contain your local paths and descriptions. Switching storage migrates the current catalog and keeps a local backup of the destination's previous contents. Paths may need updating when syncing to another computer.
-
-## Uniqueness and concurrent edits
-
-Client names are unique within the catalog, project names within a client, and module names within a project. Names are trimmed, case-insensitive and NFC-normalized. Equivalent paths cannot be added twice to one project; Windows spelling variants and file URIs share an identity. Different projects may reference the same folder, which is deduplicated when opening a client workspace. Symbolic links and junctions are not resolved.
-
-Add, rename, path changes and drag moves enforce the same rules. Repeated imports are idempotent; conflicting module names receive numbered names. Existing conflicting data is protected, never silently deleted. Export a backup before repairing it; importing into an empty catalog merges duplicate groups and paths. Shared-snapshot corruption stops writes and preserves the file.
-
-Local extension storage also contains a transaction snapshot. Extension writes use a cross-process lock; other windows refresh approximately every two seconds. Manual settings edits and Settings Sync do not participate in this lock and need review when concurrent edits occur.
-
-Tests use VS Code 1.143.1 by default (override with VSCODE_TEST_VERSION). The host-independent suites run with npm run test:unit. CI is configured for Windows, Linux and macOS with minimum VS Code 1.140.0 and the pinned version.
-
-## Development
-
-Run `npm install` and `npm run compile`, then press F5 to launch the Extension Development Host. `npm run watch` rebuilds changes. `npm test` runs catalog, storage, dashboard, localization, and extension-host tests; `npm run package:vsix` creates an installable extension.
-
-Manifest messages live in `package.nls.json` and `package.nls.zh*.json`. Native dialogs and the Webview share English message keys and `src/locales/zh-cn.json` through `src/i18n.ts`. Preserve placeholders when adding translations.
-
-This extension has an independently implemented three-level grouping model, with dashboard inspiration from [Project Dashboard](https://github.com/Kruemelkatze/vscode-dashboard).
+Download a `.vsix` from [GitHub Releases](https://github.com/Xanyone/project-dashboard/releases/latest), then choose **Install from VSIX** in VS Code's Extensions view. Requires VS Code 1.140.0 or later.
