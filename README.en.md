@@ -8,11 +8,11 @@ Organize local folders by **client → project → module**, then open them from
 
 Download a `.vsix` from [GitHub Releases](https://github.com/Xanyone/project-dashboard/releases/latest) and choose **Install from VSIX** in VS Code's Extensions menu. Requires VS Code 1.140.0 or later.
 
-The dashboard opens on startup by default. Press `Ctrl+Alt+G` (`Cmd+Alt+G` on macOS) or run **Client Projects: Open dashboard** to open it again.
+The dashboard opens automatically in an empty window by default. Existing workspaces are not forced to switch views. Press `Ctrl+Alt+G` (`Cmd+Alt+G` on macOS) or run **Client Projects: Open dashboard** to open it again.
 
 Add a client, add a project, then select a folder to add a module. Give each module a custom type, such as Frontend, API, or Config. Search by name, type, description, or path; filter by type or missing paths. Click a folder to open it, or open an entire project as a multi-root workspace. Hold Ctrl/Cmd to invert the configured window behavior.
 
-The grouping sidebar is optional. Enable `clientProjectDashboard.showSidebar` and reload the window to display its activity bar icon and use its tree and drag-and-drop controls.
+The grouping sidebar is enabled by default. If its activity bar icon is hidden, enable `clientProjectDashboard.showSidebar` and reload the window.
 
 The interface follows VS Code's display language. Chinese locales use Simplified Chinese; other locales use English. User names, descriptions, paths, and custom module types remain unchanged.
 
@@ -20,8 +20,8 @@ The interface follows VS Code's display language. Chinese locales use Simplified
 
 | Setting | Default | Purpose |
 | --- | --- | --- |
-| `clientProjectDashboard.openOnStartup` | `always` | `never`, `emptyWindow`, or `always`; existing explicit settings are preserved |
-| `clientProjectDashboard.showSidebar` | `false` | Show the grouping sidebar |
+| `clientProjectDashboard.openOnStartup` | `emptyWindow` | `never`, `emptyWindow`, or `always`; existing explicit settings are preserved |
+| `clientProjectDashboard.showSidebar` | `true` | Show the grouping sidebar |
 | `clientProjectDashboard.openInNewWindow` | `false` | Open modules in a new window |
 | `clientProjectDashboard.showPath` | `true` | Show paths on folder cards |
 | `clientProjectDashboard.storage` | `globalState` | Use `settings` to store the catalog in user settings for Settings Sync |

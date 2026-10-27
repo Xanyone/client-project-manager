@@ -26,8 +26,8 @@ suite('extension host', () => {
         const extension = vscode.extensions.getExtension('Xanyone.client-project-dashboard')!;
         await extension.activate();
         const configuration = vscode.workspace.getConfiguration('clientProjectDashboard');
-        assert.equal(configuration.inspect('openOnStartup')?.defaultValue, 'always');
-        assert.equal(configuration.inspect('showSidebar')?.defaultValue, false);
+        assert.equal(configuration.inspect('openOnStartup')?.defaultValue, 'emptyWindow');
+        assert.equal(configuration.inspect('showSidebar')?.defaultValue, true);
         const view = extension.packageJSON.contributes.views.clientProjectDashboard[0];
         assert.equal(view.when, 'config.clientProjectDashboard.showSidebar');
         const container = extension.packageJSON.contributes.viewsContainers.activitybar[0];

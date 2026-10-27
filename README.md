@@ -23,7 +23,7 @@ A客户
 
 ## 功能
 
-- 默认启动时打开仪表盘，分组侧栏按需启用
+- 默认在空窗口启动时打开仪表盘，分组侧栏默认开启
 - 中英文界面跟随 VS Code 的显示语言，其他语言回退英文；中文环境使用简体中文
 - 可选侧边栏树：客户、项目、模块三级
 - 仪表盘：折叠查看客户、项目和目录，可搜索、按模块类型筛选，也可只看路径缺失的目录
@@ -38,7 +38,7 @@ A客户
 
 用 VS Code 打开本目录，按 `F5`。扩展开发主机会自动打开仪表盘。
 
-默认仅显示仪表盘入口。如需分组树，在设置中启用 `clientProjectDashboard.showSidebar`，然后重新加载窗口，即可显示「客户项目」活动栏图标。将 `clientProjectDashboard.openOnStartup` 设为 `never` 可关闭自动打开；已有显式设置会保留。
+空窗口启动时会自动打开仪表盘；已有工作区不会被强行切换。`clientProjectDashboard.showSidebar` 默认开启，若隐藏了活动栏图标，可在设置中重新启用并重新加载窗口。将 `clientProjectDashboard.openOnStartup` 设为 `never` 可关闭自动打开；也可设为 `always` 让每次启动都打开。
 
 也可以：
 
@@ -72,8 +72,8 @@ A客户
 
 | 设置 | 默认 | 作用 |
 | --- | --- | --- |
-| `clientProjectDashboard.openOnStartup` | `always` | `never` / `emptyWindow` / `always` |
-| `clientProjectDashboard.showSidebar` | `false` | 按需显示客户项目分组侧栏 |
+| `clientProjectDashboard.openOnStartup` | `emptyWindow` | `never` / `emptyWindow` / `always` |
+| `clientProjectDashboard.showSidebar` | `true` | 显示客户项目分组侧栏 |
 | `clientProjectDashboard.openInNewWindow` | `false` | 单击是否新开窗口 |
 | `clientProjectDashboard.showPath` | `true` | 目录卡片上是否显示路径末段 |
 | `clientProjectDashboard.storage` | `globalState` | 改为 `settings` 后写入用户设置 |

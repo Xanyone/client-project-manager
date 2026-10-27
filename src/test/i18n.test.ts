@@ -36,7 +36,10 @@ suite('internationalization', () => {
             assert.ok(english[match[1]], `Missing English manifest message: ${match[1]}`);
             assert.ok(translated[match[1]], `Missing Chinese manifest message: ${match[1]}`);
         }
-        assert.equal((JSON.parse(manifest).contributes.viewsContainers.activitybar[0] as { when: string }).when, 'config.clientProjectDashboard.showSidebar');
+        const parsed = JSON.parse(manifest);
+        assert.equal((parsed.contributes.viewsContainers.activitybar[0] as { when: string }).when, 'config.clientProjectDashboard.showSidebar');
+        assert.equal(parsed.contributes.configuration.properties['clientProjectDashboard.showSidebar'].default, true);
+        assert.equal(parsed.contributes.configuration.properties['clientProjectDashboard.openOnStartup'].default, 'emptyWindow');
         const script = readFileSync(resolve(__dirname, '../../media/dashboard.js'), 'utf8');
         for (const match of script.matchAll(/(?:\bt|countMessage)\("([^"]+)"/g)) {
             assert.ok(Object.hasOwn(chinese, match[1]), `Missing Webview message: ${match[1]}`);

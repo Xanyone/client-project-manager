@@ -31,7 +31,7 @@ export function activate(context: vscode.ExtensionContext): void {
         }),
     );
 
-    const startup = vscode.workspace.getConfiguration(CONFIG_SECTION).get<string>('openOnStartup', 'always');
+    const startup = vscode.workspace.getConfiguration(CONFIG_SECTION).get<string>('openOnStartup', 'emptyWindow');
     const hasFolder = (vscode.workspace.workspaceFolders?.length ?? 0) > 0;
     if (shouldOpenDashboard(startup, hasFolder)) {
         dashboard.show();

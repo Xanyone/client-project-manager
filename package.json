@@ -2,7 +2,7 @@
   "name": "client-project-dashboard",
   "displayName": "%extension.displayName%",
   "description": "%extension.description%",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "publisher": "Xanyone",
   "engines": {
     "vscode": "^1.140.0"
@@ -290,7 +290,7 @@
             "%settings.openOnStartup.emptyWindow%",
             "%settings.openOnStartup.always%"
           ],
-          "default": "always",
+          "default": "emptyWindow",
           "description": "%settings.openOnStartup.description%"
         },
         "clientProjectDashboard.openInNewWindow": {
@@ -328,7 +328,7 @@
         },
         "clientProjectDashboard.showSidebar": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "%settings.showSidebar.description%",
           "scope": "application"
         }

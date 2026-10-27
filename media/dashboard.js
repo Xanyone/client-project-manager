@@ -75,7 +75,7 @@
         renderFilters(kindsOf(model), kindCounts(searched));
         filters.hidden = clients.length === 0;
         if (tools) {
-            tools.hidden = false;
+            tools.hidden = clients.length === 0;
         }
         list.replaceChildren();
         renderList(clients, searched, view);
