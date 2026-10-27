@@ -45,6 +45,16 @@ Manual settings edits, Settings Sync and older extension versions do not partici
 
 Use `store.update(current => addModule(current, projectId, input).catalog)`. Never compute a full replacement from `store.get()` before waiting in the transaction queue. Never implement a separate UI-only uniqueness rule or offer to bypass a conflict. Do not lowercase POSIX/remote paths. Do not delete old workspace files unless window state is available and the generated file is old and inactive.
 
+## Folder type contract
+
+`ModuleEntry.kind` remains a nonempty string in catalog version 1; importing and exporting preserve it exactly. New built-ins use reserved `builtin:*` IDs defined in `src/folderTypes.ts`. Only known reserved IDs receive translated labels and preset colors. Historical strings (including `Frontend`, `frontend`, and unknown IDs) retain their original display and identity; no automatic migration or case folding occurs.
+
+`folderTypeOptions(catalog, saved, defaultId, current?)` combines built-ins, validated saved custom types, catalog types, and the default/current IDs. It deduplicates by exact ID, preserving current-first/default-second ordering. Labels and colors resolve through shared helpers in the native picker, sidebar, dashboard cards and filter model. Search uses the display label and stored ID; filters use the stored ID.
+
+The application-scoped user settings `folderTypes` and `defaultFolderType` affect choices and initial ordering only. Type assignments still go through functional `store.update` operations. Cancelled or unchanged edits never write. Custom UI input is trimmed, nonempty, at most 80 UTF-16 code units, and cannot start with `builtin:`. Invalid manual preferences fall back safely; legacy catalog types remain selectable when editing. Removing a saved type retains catalog assignments; removing the saved default resets it to `builtin:other` before removing its saved choice. Preference write failures propagate to the existing command/Webview error handlers.
+
+`folderTypes.test.ts` covers normalization, legacy identity, locale labels, stable IDs and JSON round trips; `folderTypeActions.test.ts` covers defaults, custom reuse, cancellation, management, failed settings writes and consistency between the native sidebar and Webview model.
+
 ## Regression gates
 
 - `uniqueness.test.ts`: scoped names, Unicode, paths, import idempotence, edit/drop conflicts, validation.

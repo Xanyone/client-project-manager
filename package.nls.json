@@ -11,7 +11,7 @@
   "commands.addModule.title": "Add module",
   "commands.rename.title": "Rename",
   "commands.setColor.title": "Set color",
-  "commands.setKind.title": "Set module type",
+  "commands.setKind.title": "Set folder type",
   "commands.setPath.title": "Set path",
   "commands.setDescription.title": "Set description",
   "commands.edit.title": "Edit",
@@ -37,5 +37,8 @@
   "settings.storage.settings": "Save in user settings for Settings Sync",
   "settings.storage.description": "Where to store the catalog.",
   "settings.catalog.description": "Catalog data used in settings storage mode. Usually managed by the extension.",
-  "settings.showSidebar.description": "Show the Client Projects sidebar. By default, use the dashboard only."
+  "settings.showSidebar.description": "Show the Client Projects sidebar. By default, use the dashboard only.",
+  "commands.manageFolderTypes.title": "Manage folder types",
+  "settings.folderTypes.description": "Saved custom folder types. Built-in types and types used by existing folders remain available. You can also use Manage folder types.",
+  "settings.defaultFolderType.description": "Type shown first when adding a folder; defaults to Other. Choose it using Manage folder types. Existing folders are unchanged."
 }

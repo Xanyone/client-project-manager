@@ -2,8 +2,9 @@ import { getLanguage, getMessages, t } from './i18n.js';
 import * as vscode from 'vscode';
 import { randomBytes } from 'node:crypto';
 import type { ProjectActions } from './actions.js';
-import { DEFAULT_KIND_COLOR, CONFIG_SECTION, colorAt } from './constants.js';
+import { CONFIG_SECTION, colorAt } from './constants.js';
 import { pathInspector } from './pathInspector.js';
+import { folderTypeColor, folderTypeLabel } from './folderTypes.js';
 import type { CatalogStore } from './store.js';
 import {
     type DashboardModel,
@@ -87,8 +88,8 @@ export class DashboardPanel implements vscode.Disposable {
             showPath: config.get<boolean>('showPath', true),
             kinds: kinds.map(kind => ({
                 id: kind,
-                label: kind,
-                color: DEFAULT_KIND_COLOR,
+                label: folderTypeLabel(kind),
+                color: folderTypeColor(kind),
             })),
             clients: catalog.clients.map((client, clientIndex) => ({
                 id: client.id,
@@ -106,10 +107,10 @@ export class DashboardPanel implements vscode.Disposable {
                             id: module.id,
                             name: module.name,
                             kind: module.kind,
-                            kindLabel: module.kind,
+                            kindLabel: folderTypeLabel(module.kind),
                             path: module.path,
                             description: module.description ?? '',
-                            color: module.color ?? DEFAULT_KIND_COLOR,
+                            color: module.color ?? folderTypeColor(module.kind),
                             exists: inspected.exists,
                             git: inspected.git,
                         };
@@ -157,6 +158,9 @@ export class DashboardPanel implements vscode.Disposable {
                     break;
                 case 'add-module':
                     await this.actions.addModule(ref?.type === 'project' ? ref.id : undefined);
+                    break;
+                case 'manage-types':
+                    await this.actions.manageFolderTypes();
                     break;
                 case 'edit':
                     await this.actions.edit(ref);
@@ -243,6 +247,7 @@ export function dashboardHtml(webview: vscode.Webview, extensionUri: vscode.Uri)
                     <button type="button" class="text-action" data-action="add-client">${escapeHtml(t("Add client"))}</button>
                     <button type="button" class="text-action" data-action="import">${escapeHtml(t("Import"))}</button>
                     <button type="button" class="text-action" data-action="export">${escapeHtml(t("Back up"))}</button>
+                    <button type="button" class="text-action" data-action="manage-types">${escapeHtml(t("Folder types"))}</button>
                 </div>
 			</div>
 			<div id="list" class="stage-body"></div>

@@ -232,7 +232,8 @@
         const tags = el('span', 'module-tags');
         const kind = el('span', 'module-kind');
         kind.append(tick(module.color), document.createTextNode(module.kindLabel || t("Folder")));
-        tags.append(kind, roleTag(t("Module")), roleTag(t("Folder")));
+        tags.append(kind);
+        kind.title = module.kindLabel || t("Folder");
         if (module.git) {
             tags.append(el('span', 'tag', 'Git'));
         }
@@ -380,7 +381,8 @@
         }
         const swatch = el('span', 'swatch');
         swatch.style.background = safeColor(kind.color);
-        button.append(swatch, document.createTextNode(kind.label), el('span', 'chip-count', numbers.format(countForKind)));
+        button.title = kind.label;
+        button.append(swatch, el('span', 'chip-label', kind.label), el('span', 'chip-count', numbers.format(countForKind)));
         return button;
     }
 

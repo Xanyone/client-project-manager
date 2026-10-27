@@ -13,3 +13,4 @@ esbuild.js
 .github/**
 RELEASE_NOTES.md
 examples/**
+.playwright-mcp/**

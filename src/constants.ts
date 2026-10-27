@@ -15,6 +15,7 @@ export const COMMANDS = {
     rename: 'clientProjectDashboard.rename',
     setColor: 'clientProjectDashboard.setColor',
     setKind: 'clientProjectDashboard.setKind',
+    manageFolderTypes: 'clientProjectDashboard.manageFolderTypes',
     setPath: 'clientProjectDashboard.setPath',
     setDescription: 'clientProjectDashboard.setDescription',
     edit: 'clientProjectDashboard.edit',

@@ -10,7 +10,7 @@ Download a `.vsix` from [GitHub Releases](https://github.com/Xanyone/project-das
 
 The dashboard opens automatically in an empty window by default. Existing workspaces are not forced to switch views. Press `Ctrl+Alt+G` (`Cmd+Alt+G` on macOS) or run **Client Projects: Open dashboard** to open it again.
 
-Add a client, add a project, then select a folder to add a module. Give each module a custom type, such as Frontend, API, or Config. Search by name, type, description, or path; filter by type or missing paths. Click a folder to open it, choose a window from its card, or open an entire project as a multi-root workspace. Hold Ctrl/Cmd to invert the configured window behavior.
+Add a client, add a project, then select a folder to add a module. Choose a built-in or custom folder type. Search by name, type, description, or path; filter by type or missing paths. Click a folder to open it, choose a window from its card, or open an entire project as a multi-root workspace. Hold Ctrl/Cmd to invert the configured window behavior.
 
 The grouping sidebar is enabled by default. If its activity bar icon is hidden, enable `clientProjectDashboard.showSidebar` and reload the window.
 
@@ -25,6 +25,16 @@ The interface follows VS Code's display language. Chinese locales use Simplified
 | `clientProjectDashboard.openInNewWindow` | `false` | Open modules in a new window |
 | `clientProjectDashboard.showPath` | `true` | Show paths on folder cards |
 | `clientProjectDashboard.storage` | `globalState` | Use `settings` to store the catalog in user settings for Settings Sync |
+| `clientProjectDashboard.folderTypes` | `[]` | Saved custom folder types |
+| `clientProjectDashboard.defaultFolderType` | `builtin:other` | Type shown first when adding a folder |
+
+## Folder types
+
+Choose Frontend, Backend, API, Config, Docs, Tests, Scripts, or Other when adding a folder or editing its type. **Custom type…** accepts a new name; types already used in the catalog are offered automatically. Custom names are case-sensitive and keep their original spelling.
+
+Use **Folder types** on the dashboard, **Manage folder types** in the sidebar's More Actions menu, or **Client Projects: Manage folder types** in the Command Palette to save custom choices, set a default, or remove saved choices. The default is first when adding; the current type is first when editing. Esc cancels without changing the folder. Removing a saved choice preserves existing folders and their reusable types; removing the saved default resets it to Other.
+
+Preferences live in user settings; catalog backups contain folder type assignments, but do not include the saved list or default preference. Built-ins use stable `builtin:frontend`, `builtin:backend`, `builtin:api`, `builtin:config`, `builtin:docs`, `builtin:tests`, `builtin:scripts`, and `builtin:other` IDs. Their labels follow VS Code's language; historical and custom types remain unchanged.
 
 Data stays in local extension storage by default. **Back up** exports JSON; **Import** merges a backup by client/project name and skips duplicate module paths. Backups contain your local paths and descriptions. Switching storage migrates the current catalog and keeps a local backup of the destination's previous contents. Paths may need updating when syncing to another computer.
 

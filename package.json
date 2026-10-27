@@ -2,7 +2,7 @@
   "name": "client-project-dashboard",
   "displayName": "%extension.displayName%",
   "description": "%extension.description%",
-  "version": "0.3.5",
+  "version": "0.4.0",
   "publisher": "Xanyone",
   "engines": {
     "vscode": "^1.140.0"
@@ -165,6 +165,12 @@
         "command": "clientProjectDashboard.importCatalog",
         "title": "%commands.importCatalog.title%",
         "category": "%commands.category%"
+      },
+      {
+        "command": "clientProjectDashboard.manageFolderTypes",
+        "title": "%commands.manageFolderTypes.title%",
+        "category": "%commands.category%",
+        "icon": "$(symbol-enum)"
       }
     ],
     "menus": {
@@ -183,6 +189,11 @@
           "command": "clientProjectDashboard.refresh",
           "when": "view == clientProjectDashboard.explorer",
           "group": "navigation@3"
+        },
+        {
+          "command": "clientProjectDashboard.manageFolderTypes",
+          "when": "view == clientProjectDashboard.explorer",
+          "group": "2_configuration"
         }
       ],
       "view/item/context": [
@@ -331,6 +342,26 @@
           "default": true,
           "description": "%settings.showSidebar.description%",
           "scope": "application"
+        },
+        "clientProjectDashboard.folderTypes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "pattern": "^(?!\\s*builtin:)\\S(?:[\\s\\S]*\\S)?$"
+          },
+          "uniqueItems": true,
+          "default": [],
+          "description": "%settings.folderTypes.description%",
+          "scope": "application"
+        },
+        "clientProjectDashboard.defaultFolderType": {
+          "type": "string",
+          "minLength": 1,
+          "default": "builtin:other",
+          "description": "%settings.defaultFolderType.description%",
+          "scope": "application"
         }
       }
     }
@@ -349,7 +380,7 @@
     "lint": "eslint src media/dashboard.js --max-warnings 0",
     "test": "vscode-test",
     "package:vsix": "vsce package --no-dependencies",
-    "test:unit": "npm run compile-tests && mocha --ui tdd out/test/catalog.test.js out/test/uniqueness.test.js out/test/dashboard.test.js"
+    "test:unit": "npm run compile-tests && mocha --ui tdd out/test/catalog.test.js out/test/uniqueness.test.js out/test/dashboard.test.js out/test/folderTypes.test.js"
   },
   "devDependencies": {
     "@types/jsdom": "^30.0.0",

@@ -92,10 +92,10 @@ suite('internationalization', () => {
                 const update = sandbox.stub().resolves(true);
                 const store = { get: () => module.catalog, update } as unknown as CatalogStore;
                 const actions = new ProjectActions({} as vscode.ExtensionContext, store);
-                const input = sandbox.stub(vscode.window, 'showInputBox').resolves(undefined);
+                const picker = sandbox.stub(vscode.window, 'showQuickPick').resolves(undefined);
                 await actions.setKind({ type: 'module', id: module.module.id });
-                assert.equal(input.firstCall.args[0]?.prompt, language === 'en' ? 'Folder type' : '目录类型');
-                assert.equal(input.firstCall.args[0]?.value, '原始类型');
+                assert.equal(picker.firstCall.args[1]?.title, language === 'en' ? 'Folder type' : '目录类型');
+                assert.equal((picker.firstCall.args[0] as vscode.QuickPickItem[])[0].label, '原始类型');
                 const warning: sinon.SinonStub = sandbox.stub(vscode.window, 'showWarningMessage');
                 warning.resolves(t('Delete'));
                 await actions.remove({ type: 'client', id: client.client.id });

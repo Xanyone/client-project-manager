@@ -319,6 +319,15 @@ button.ghost:hover {
     color: var(--muted);
     font-size: 12px;
     white-space: nowrap;
+    max-width: 100%;
+    min-width: 0;
+}
+
+.chip-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .chip:hover:not(:disabled):not(.active) {
@@ -336,6 +345,7 @@ button.ghost:hover {
 }
 
 .chip-count {
+    flex: none;
     color: var(--muted);
     font-family: var(--mono);
     font-size: 11px;
@@ -638,6 +648,9 @@ button.ghost:hover {
     border-radius: 999px;
     background: color-mix(in srgb, var(--tone, var(--signal)) 16%, transparent);
     font-size: 11px;
+    max-width: 100%;
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 .module-heading {

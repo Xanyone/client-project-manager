@@ -22,6 +22,7 @@ import {
 import { COLOR_PRESETS, CONFIG_SECTION, colorAt } from './constants.js';
 import { openFolders, openPath, revealPath, toUri } from './opener.js';
 import { pathInspector } from './pathInspector.js';
+import { customFolderTypes, customTypeError, defaultFolderType, DEFAULT_FOLDER_TYPE, folderTypeOptions } from './folderTypes.js';
 import type { CatalogStore } from './store.js';
 import {
     type NodeRef,
@@ -187,12 +188,99 @@ export class ProjectActions {
         }
         const located = findNode(this.store.get(), resolved);
         const kind = located?.type === 'module'
-            ? await askText(t("Folder type"), t("Enter a custom type"), located.module.kind)
+            ? await this.pickFolderType(located.module.kind)
             : undefined;
-        if (!kind) {
+        if (!kind || (located?.type === 'module' && kind === located.module.kind)) {
             return;
         }
         await this.store.update(current => setModuleKind(current, resolved, kind));
+    }
+
+    async manageFolderTypes(): Promise<void> {
+        const action = await vscode.window.showQuickPick([
+            { label: t('Set default folder type'), action: 'default' },
+            { label: t('Add custom folder type'), action: 'add' },
+            { label: t('Remove saved folder type'), action: 'remove' },
+        ], { title: t('Manage folder types'), placeHolder: t('Choose an action') });
+        if (!action) { return; }
+        if (action.action === 'default') {
+            const kind = await this.pickFolderType(undefined, false);
+            if (kind) {
+                await vscode.workspace.getConfiguration(CONFIG_SECTION).update('defaultFolderType', kind, vscode.ConfigurationTarget.Global);
+            }
+            return;
+        }
+        if (action.action === 'add') {
+            const value = await this.askCustomFolderType();
+            if (!value) { return; }
+            const config = vscode.workspace.getConfiguration(CONFIG_SECTION);
+            const saved = customFolderTypes(config.get<unknown>('folderTypes', []));
+            if (!saved.includes(value)) {
+                await config.update('folderTypes', [...saved, value], vscode.ConfigurationTarget.Global);
+            }
+            return;
+        }
+        const config = vscode.workspace.getConfiguration(CONFIG_SECTION);
+        const saved = customFolderTypes(config.get<unknown>('folderTypes', []));
+        if (!saved.length) {
+            void vscode.window.showInformationMessage(t('No saved custom types. Types used by existing folders remain available.'));
+            return;
+        }
+        const selected = await vscode.window.showQuickPick(saved.map(id => ({ label: id, id })), {
+            title: t('Remove saved folder type'),
+            placeHolder: t('Existing folders keep their types; used types remain available'),
+        });
+        if (!selected) { return; }
+        // Reset the default first so a failed second write still leaves a usable configuration.
+        if (defaultFolderType(config.get<unknown>('defaultFolderType')) === selected.id) {
+            await config.update('defaultFolderType', DEFAULT_FOLDER_TYPE, vscode.ConfigurationTarget.Global);
+        }
+        await config.update('folderTypes', saved.filter(id => id !== selected.id), vscode.ConfigurationTarget.Global);
+    }
+
+    private async pickFolderType(current?: string, allowManage = true): Promise<string | undefined> {
+        while (true) {
+            const config = vscode.workspace.getConfiguration(CONFIG_SECTION);
+            const defaultId = defaultFolderType(config.get<unknown>('defaultFolderType'));
+            const items = folderTypeOptions(this.store.get(), config.get<unknown>('folderTypes', []), defaultId, current)
+                .filter(item => allowManage || defaultFolderType(item.id) === item.id)
+                .map(item => ({
+                    label: item.label,
+                    description: [
+                        item.id === current ? t('Current type') : '',
+                        item.id === defaultId ? t('Default type') : '',
+                        item.source === 'builtin' ? t('Built-in type') : item.source === 'saved' ? t('Saved type') : t('Used type'),
+                    ].filter(Boolean).join(' · '),
+                    id: item.id,
+                    action: 'select',
+                }));
+            items.push({ label: t('Custom type…'), description: t('Enter a new folder type'), id: '', action: 'custom' });
+            if (allowManage) {
+                items.push({ label: t('Manage folder types…'), description: t('Set a default or manage saved types'), id: '', action: 'manage' });
+            }
+            const picked = await vscode.window.showQuickPick(items, {
+                title: t('Folder type'),
+                placeHolder: t('Choose a type or create a custom one'),
+                matchOnDescription: true,
+            });
+            if (!picked) { return undefined; }
+            if (picked.action === 'manage') {
+                await this.manageFolderTypes();
+                continue;
+            }
+            if (picked.action === 'custom') { return this.askCustomFolderType(); }
+            return picked.id;
+        }
+    }
+
+    private async askCustomFolderType(): Promise<string | undefined> {
+        const value = await vscode.window.showInputBox({
+            prompt: t('Folder type'),
+            placeHolder: t('Enter a custom type, such as Frontend, API, or Config'),
+            validateInput: customTypeError,
+        });
+        const trimmed = value?.trim();
+        return trimmed && !customTypeError(trimmed) ? trimmed : undefined;
     }
 
     async setPath(ref?: NodeRef): Promise<void> {
@@ -418,7 +506,7 @@ export class ProjectActions {
         if (!name) {
             return;
         }
-        const kind = await askText(t("Folder type"), t("Enter a custom type, such as Frontend, API, or Config"));
+        const kind = await this.pickFolderType();
         if (!kind) {
             return;
         }

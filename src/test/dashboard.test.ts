@@ -4,6 +4,32 @@ import { resolve } from 'node:path';
 import { JSDOM } from 'jsdom';
 
 suite('dashboard interactions', () => {
+    test('keeps stable built-in filters across label changes and exposes type management', () => {
+        const dom = new JSDOM('<body><input id=search><div id=metrics></div><div class=stage-tools><div id=filters></div><button data-action=manage-types></button></div><div id=list></div></body>', { runScripts: 'outside-only' });
+        const messages: Array<{ type: string }> = [];
+        Object.assign(dom.window, { acquireVsCodeApi: () => ({ getState() {}, setState() {}, postMessage(message: { type: string }) { messages.push(message); } }) });
+        try {
+            dom.window.eval(readFileSync(resolve(__dirname, '../../media/dashboard.js'), 'utf8'));
+            const render = (label: string) => dom.window.dispatchEvent(new dom.window.MessageEvent('message', { data: { type: 'render', model: {
+                kinds: [{ id: 'builtin:frontend', label, color: '#4c8dff' }, { id: 'Frontend', label: 'Frontend', color: '#8b9bb4' }],
+                clients: [{ id: 'c', name: 'Client', projects: [{ id: 'p', name: 'Project', modules: [
+                    { id: 'builtin', name: 'Built-in folder', kind: 'builtin:frontend', kindLabel: label, path: 'C:/frontend', exists: true },
+                    { id: 'custom', name: 'Historical folder', kind: 'Frontend', kindLabel: 'Frontend', path: 'C:/legacy', exists: true },
+                ] }] }],
+            } } }));
+            render('前端');
+            const doc = dom.window.document;
+            (doc.querySelector('[data-kind="builtin:frontend"]') as HTMLElement).click();
+            assert.equal(doc.querySelectorAll('.module-card').length, 1);
+            assert.equal(doc.querySelector('.module-name')?.textContent, 'Built-in folder');
+            render('Frontend');
+            assert.equal(doc.querySelectorAll('.module-card').length, 1);
+            assert.equal(doc.querySelector('.module-name')?.textContent, 'Built-in folder');
+            (doc.querySelector('[data-action=manage-types]') as HTMLElement).click();
+            assert.equal(messages.at(-1)?.type, 'manage-types');
+        } finally { dom.window.close(); }
+    });
+
     test('filters missing paths and sends open modifiers', () => {
         const dom = new JSDOM('<body><input id=search><div id=metrics></div><div class=stage-tools><div id=filters></div></div><div id=list></div></body>', { runScripts: 'outside-only' });
         const messages: unknown[] = [];
