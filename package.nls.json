@@ -39,6 +39,6 @@
   "settings.catalog.description": "Catalog data used in settings storage mode. Usually managed by the extension.",
   "settings.showSidebar.description": "Show the Client Projects sidebar. By default, use the dashboard only.",
   "commands.manageFolderTypes.title": "Manage folder types",
-  "settings.folderTypes.description": "Saved custom folder types. Built-in types and types used by existing folders remain available. You can also use Manage folder types.",
-  "settings.defaultFolderType.description": "Type shown first when adding a folder; defaults to Other. Choose it using Manage folder types. Existing folders are unchanged."
+  "settings.folderTypes.description": "Custom folder types. New custom types are saved here automatically. The picker uses built-in types and this list.",
+  "settings.defaultFolderType.description": "Built-in or configured custom type shown first when adding a folder. Choose it using Manage folder types; unconfigured defaults use Other."
 }

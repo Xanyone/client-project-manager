@@ -15,7 +15,7 @@
     }
     const vscode = acquireVsCodeApi();
     const previous = vscode.getState() || {};
-    let model = previous.model || { clients: [], kinds: [], openInNewWindow: false, showPath: true };
+    let model = { clients: [], kinds: [], openInNewWindow: false, showPath: true };
     let query = previous.query || '';
     let kindFilter = previous.kindFilter || '';
     let missingOnly = previous.missingOnly === true;
@@ -42,7 +42,7 @@
             return;
         }
         model = message.model || model;
-        if (kindFilter && !kindsOf(model).some(function (kind) { return kind.id === kindFilter; })) {
+        if (kindFilter && !model.kinds.some(function (kind) { return kind.id === kindFilter; })) {
             kindFilter = '';
         }
         persist();
@@ -72,7 +72,7 @@
         const listScroll = list.scrollTop;
 
         renderMetrics(count(clients));
-        renderFilters(kindsOf(model), kindCounts(searched));
+        renderFilters(model.kinds, kindCounts(searched));
         filters.hidden = clients.length === 0;
         if (tools) {
             tools.hidden = false;
@@ -144,7 +144,7 @@
         );
         const actions = el('div', 'fold-actions');
         if (!isFiltering()) {
-            actions.append(actionButton(t("Add project"), 'text-action', 'add-project', client.id, 'client'));
+            actions.append(actionButton(t("Add project"), 'action-button', 'add-project', client.id, 'client'));
         }
         actions.append(menuButton(t("Edit client"), 'edit', client.id, 'client'));
         line.append(toggle, actions);
@@ -182,12 +182,14 @@
             dot.setAttribute('aria-label', dot.title);
             toggle.append(dot);
         }
+        toggle.append(el('span', 'project-count', countMessage("{0} folder", "{0} folders", project.modules.length)));
         const actions = el('div', 'fold-actions');
+        const openProject = actionButton(t("Open project"), 'action-button primary', 'open', project.id, 'project');
+        openProject.disabled = project.modules.length === 0;
+        openProject.title = openProject.disabled ? t("Add a folder before opening this project") : t("Open all folders using your default window preference");
         actions.append(
-            el('span', 'project-count', countMessage("{0} folder", "{0} folders", project.modules.length)),
-            actionButton(t("Open project"), 'text-action', 'open', project.id, 'project'),
-            actionButton(t("Open as workspace"), 'text-action', 'workspace', project.id, 'project'),
-            actionButton(t("Add folder"), 'text-action', 'add-module', project.id, 'project'),
+            openProject,
+            actionButton(t("Add folder"), 'action-button', 'add-module', project.id, 'project'),
             menuButton(t("Edit project"), 'edit', project.id, 'project'),
         );
         line.append(toggle, actions);
@@ -246,7 +248,7 @@
         }
         const actions = el('div', 'module-actions');
         actions.append(
-            actionButton(t("Choose window"), 'text-action module-window', 'open-window', module.id, 'module'),
+            actionButton(t("Choose window"), 'action-button module-window', 'open-window', module.id, 'module'),
             menuButton(t("Edit folder"), 'edit', module.id, 'module'),
         );
         card.append(open, actions);
@@ -602,26 +604,6 @@
             });
         });
         return counts;
-    }
-
-    function kindsOf(current) {
-        if (current.kinds && current.kinds.length) {
-            return current.kinds;
-        }
-        const kinds = [];
-        const seen = new Set();
-        (current.clients || []).forEach(function (client) {
-            (client.projects || []).forEach(function (project) {
-                (project.modules || []).forEach(function (module) {
-                    const id = module.kind || module.kindLabel || t("Other");
-                    if (!seen.has(id)) {
-                        seen.add(id);
-                        kinds.push({ id: id, label: module.kindLabel || id, color: module.color || '#8b9bb4' });
-                    }
-                });
-            });
-        });
-        return kinds;
     }
 
     function includes(value, needle) {

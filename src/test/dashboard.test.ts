@@ -37,7 +37,7 @@ suite('dashboard interactions', () => {
         Object.assign(dom.window, { acquireVsCodeApi: () => ({ getState: () => undefined, setState: (value: unknown) => { saved = value; }, postMessage: (message: unknown) => messages.push(message) }) });
         dom.window.eval(readFileSync(resolve(__dirname, '../../media/dashboard.js'), 'utf8'));
         const module = (id: string, exists: boolean) => ({ id, name: id, kind: 'frontend', kindLabel: '前端', path: `D:/${id}`, exists, color: '#4c8dff' });
-        dom.window.dispatchEvent(new dom.window.MessageEvent('message', { data: { type: 'render', model: { clients: [{ id: 'c', name: 'customer', color: '#4c8dff', projects: [{ id: 'p', name: 'project', color: '#4c8dff', modules: [module('present', true), module('missing', false)] }] }], showPath: true } } }));
+        dom.window.dispatchEvent(new dom.window.MessageEvent('message', { data: { type: 'render', model: { kinds: [{ id: 'frontend', label: '前端', color: '#4c8dff' }], clients: [{ id: 'c', name: 'customer', color: '#4c8dff', projects: [{ id: 'p', name: 'project', color: '#4c8dff', modules: [module('present', true), module('missing', false)] }] }], showPath: true } } }));
         const doc = dom.window.document;
         assert.equal(doc.querySelectorAll('.module-card').length, 2);
         assert.equal(doc.querySelectorAll('.client-icon').length, 1);
@@ -61,7 +61,7 @@ suite('dashboard interactions', () => {
         Object.assign(dom.window, { acquireVsCodeApi: () => ({ getState: () => undefined, setState() {}, postMessage() {} }) });
         dom.window.eval(readFileSync(resolve(__dirname, '../../media/dashboard.js'), 'utf8'));
         assert.ok(dom.window.document.querySelector('[data-action=add-client]'));
-        dom.window.dispatchEvent(new dom.window.MessageEvent('message', { data: { type: 'render', model: { clients: [{ id: 'c', name: '<img src=x onerror=alert(1)>', projects: [], color: '#fff000' }] } } }));
+        dom.window.dispatchEvent(new dom.window.MessageEvent('message', { data: { type: 'render', model: { kinds: [], clients: [{ id: 'c', name: '<img src=x onerror=alert(1)>', projects: [], color: '#fff000' }] } } }));
         assert.equal(dom.window.document.querySelectorAll('img').length, 0);
         assert.equal(dom.window.document.querySelector('.client-name')?.textContent, '<img src=x onerror=alert(1)>');
         dom.window.close();
@@ -70,14 +70,15 @@ suite('dashboard interactions', () => {
     test('keeps import available in an empty catalog and persists only view preferences', () => {
         const dom = new JSDOM('<body><input id=search><div id=metrics></div><div class=stage-tools><div id=filters></div><button data-action=add-client></button><button data-action=import></button><button data-action=export></button></div><div id=list></div></body>', { runScripts: 'outside-only' });
         let saved: Record<string, unknown> | undefined;
-        Object.assign(dom.window, { acquireVsCodeApi: () => ({ getState() {}, setState(value: Record<string, unknown>) { saved = value; }, postMessage() {} }) });
+        Object.assign(dom.window, { acquireVsCodeApi: () => ({ getState() { return { model: { clients: [{ id: 'old', name: 'Old cached client' }] } }; }, setState(value: Record<string, unknown>) { saved = value; }, postMessage() {} }) });
         dom.window.eval(readFileSync(resolve(__dirname, '../../media/dashboard.js'), 'utf8'));
         const doc = dom.window.document;
+        assert.equal(doc.querySelectorAll('.client-card').length, 0);
         assert.equal((doc.querySelector('.stage-tools') as HTMLElement).hidden, false);
         assert.equal((doc.querySelector('[data-action=import]') as HTMLElement).hidden, false);
         assert.equal((doc.querySelector('.stage-tools [data-action=add-client]') as HTMLElement).hidden, true);
         assert.equal((doc.querySelector('[data-action=export]') as HTMLElement).hidden, true);
-        dom.window.dispatchEvent(new dom.window.MessageEvent('message', { data: { type: 'render', model: { clients: [] } } }));
+        dom.window.dispatchEvent(new dom.window.MessageEvent('message', { data: { type: 'render', model: { clients: [], kinds: [] } } }));
         assert.ok(saved);
         assert.equal(Object.hasOwn(saved, 'model'), false);
         dom.window.close();
@@ -90,7 +91,7 @@ suite('dashboard interactions', () => {
         const module = (id: string, kind: string, kindLabel: string) => ({ id, name: id, kind, kindLabel, path: `D:/${id}`, exists: true, color: '#8b9bb4' });
         dom.window.dispatchEvent(new dom.window.MessageEvent('message', { data: {
             type: 'render',
-            model: { clients: [{ id: 'c', name: 'customer', color: '#4c8dff', projects: [{ id: 'p', name: 'project', color: '#4c8dff', modules: [module('api', 'GraphQL API', 'GraphQL API'), module('prototype', 'toString', 'toString')] }] }] },
+            model: { kinds: [{ id: 'GraphQL API', label: 'GraphQL API' }, { id: 'toString', label: 'toString' }], clients: [{ id: 'c', name: 'customer', color: '#4c8dff', projects: [{ id: 'p', name: 'project', color: '#4c8dff', modules: [module('api', 'GraphQL API', 'GraphQL API'), module('prototype', 'toString', 'toString')] }] }] },
         } }));
         const doc = dom.window.document;
         assert.equal(doc.querySelectorAll('[data-action=filter-kind]').length, 3);
@@ -98,5 +99,29 @@ suite('dashboard interactions', () => {
         assert.equal(doc.querySelectorAll('.module-card').length, 1);
         assert.equal(doc.querySelector('.module-name')?.textContent, 'api');
         dom.window.close();
+    });
+
+    test('disables empty project opening and keeps project actions separate from folding', () => {
+        const dom = new JSDOM('<body><input id=search><div id=metrics></div><div class=stage-tools><div id=filters></div></div><div id=list></div></body>', { runScripts: 'outside-only' });
+        const messages: Array<{ type: string; id: string; nodeType: string }> = [];
+        Object.assign(dom.window, { acquireVsCodeApi: () => ({ getState() {}, setState() {}, postMessage(message: { type: string; id: string; nodeType: string }) { messages.push(message); } }) });
+        try {
+            dom.window.eval(readFileSync(resolve(__dirname, '../../media/dashboard.js'), 'utf8'));
+            dom.window.dispatchEvent(new dom.window.MessageEvent('message', { data: { type: 'render', model: { kinds: [], clients: [{ id: 'c', name: 'Client', projects: [
+                { id: 'empty', name: 'Empty', modules: [] },
+                { id: 'full', name: 'Full', modules: [{ id: 'm', name: 'Folder', kind: 'builtin:other', kindLabel: 'Other', path: 'C:/folder', exists: true }] },
+            ] }] } } }));
+            const doc = dom.window.document;
+            const empty = doc.querySelector('[data-action=open][data-id=empty]') as HTMLButtonElement;
+            assert.equal(empty.disabled, true);
+            const before = messages.length;
+            empty.click();
+            assert.equal(messages.length, before);
+            (doc.querySelector('[data-action=open][data-id=full]') as HTMLElement).click();
+            assert.equal(messages.at(-1)?.type, 'open');
+            assert.equal(messages.at(-1)?.id, 'full');
+            assert.equal(doc.querySelectorAll('.project-card.open').length, 2);
+            assert.equal(doc.querySelectorAll('.project-card [data-action=workspace]').length, 0);
+        } finally { dom.window.close(); }
     });
 });

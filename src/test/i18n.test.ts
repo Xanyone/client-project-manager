@@ -66,7 +66,7 @@ suite('internationalization', () => {
                 dom.window.eval(readFileSync(resolve(__dirname, '../../media/dashboard.js'), 'utf8'));
                 assert.equal(doc.querySelector('.empty h2')?.textContent, language === 'en' ? 'Start by adding a client' : '从添加客户开始');
                 dom.window.dispatchEvent(new dom.window.MessageEvent('message', { data: {
-                    type: 'render', model: { clients: [{ id: 'c', name: '客户 & Client', color: '#4c8dff', projects: [{ id: 'p', name: '项目', color: '#4c8dff', modules: [
+                    type: 'render', model: { kinds: [{ id: 'toString', label: '自定义 API', color: '#8b9bb4' }], clients: [{ id: 'c', name: '客户 & Client', color: '#4c8dff', projects: [{ id: 'p', name: '项目', color: '#4c8dff', modules: [
                         { id: 'm', name: '<img src=x> 📦', kind: 'toString', kindLabel: '自定义 API', path: 'D:/客户', exists: false, color: '#8b9bb4' },
                     ] }] }], showPath: true },
                 } }));
@@ -95,7 +95,7 @@ suite('internationalization', () => {
                 const picker = sandbox.stub(vscode.window, 'showQuickPick').resolves(undefined);
                 await actions.setKind({ type: 'module', id: module.module.id });
                 assert.equal(picker.firstCall.args[1]?.title, language === 'en' ? 'Folder type' : '目录类型');
-                assert.equal((picker.firstCall.args[0] as vscode.QuickPickItem[])[0].label, '原始类型');
+                assert.ok(!(picker.firstCall.args[0] as vscode.QuickPickItem[]).some(item => item.label === '原始类型'));
                 const warning: sinon.SinonStub = sandbox.stub(vscode.window, 'showWarningMessage');
                 warning.resolves(t('Delete'));
                 await actions.remove({ type: 'client', id: client.client.id });

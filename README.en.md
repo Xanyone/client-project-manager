@@ -30,11 +30,13 @@ The interface follows VS Code's display language. Chinese locales use Simplified
 
 ## Folder types
 
-Choose Frontend, Backend, API, Config, Docs, Tests, Scripts, or Other when adding a folder or editing its type. **Custom type…** accepts a new name; types already used in the catalog are offered automatically. Custom names are case-sensitive and keep their original spelling.
+Choose Frontend, Backend, API, Config, Docs, Tests, Scripts, or Other when adding a folder or editing its type. **Custom type…** saves a new name to the current custom type configuration for reuse. Choices come only from built-ins and this configuration; old catalog entries and cached models do not add choices. Custom names are case-sensitive and keep their original spelling.
 
-Use **Folder types** on the dashboard, **Manage folder types** in the sidebar's More Actions menu, or **Client Projects: Manage folder types** in the Command Palette to save custom choices, set a default, or remove saved choices. The default is first when adding; the current type is first when editing. Esc cancels without changing the folder. Removing a saved choice preserves existing folders and their reusable types; removing the saved default resets it to Other.
+Use **Folder types** on the dashboard, **Manage folder types** in the sidebar's More Actions menu, or **Client Projects: Manage folder types** in the Command Palette to save custom choices, set a default, or remove saved choices. The default is first when adding; a configured current type is first when editing. Esc cancels without changing the folder. Removing a choice removes it from the picker without rewriting folder assignments; removing the saved default resets it to Other. Unconfigured defaults also use Other.
 
-Preferences live in user settings; catalog backups contain folder type assignments, but do not include the saved list or default preference. Built-ins use stable `builtin:frontend`, `builtin:backend`, `builtin:api`, `builtin:config`, `builtin:docs`, `builtin:tests`, `builtin:scripts`, and `builtin:other` IDs. Their labels follow VS Code's language; historical and custom types remain unchanged.
+Preferences live in user settings; catalog backups contain folder type assignments, but do not include the saved list or default preference. Built-ins use stable `builtin:frontend`, `builtin:backend`, `builtin:api`, `builtin:config`, `builtin:docs`, `builtin:tests`, `builtin:scripts`, and `builtin:other` IDs. Their labels follow VS Code's language.
+
+Project headings expand or collapse without a block hover background. The primary **Open project** button follows your window preference; **Add folder** is secondary, and edit controls stay visible. **Open as workspace** is available in the edit menu. Empty projects disable opening until you add a folder.
 
 Data stays in local extension storage by default. **Back up** exports JSON; **Import** merges a backup by client/project name and skips duplicate module paths. Backups contain your local paths and descriptions. Switching storage migrates the current catalog and keeps a local backup of the destination's previous contents. Paths may need updating when syncing to another computer.
 

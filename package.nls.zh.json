@@ -39,6 +39,6 @@
   "settings.catalog.description": "当存储方式为 settings 时使用的分组数据。一般不用手改。",
   "settings.showSidebar.description": "显示客户项目分组侧栏。默认仅使用仪表盘。",
   "commands.manageFolderTypes.title": "管理目录类型",
-  "settings.folderTypes.description": "常用自定义目录类型。内置类型及已有目录的类型始终可选。也可使用“管理目录类型”命令。",
-  "settings.defaultFolderType.description": "添加目录时优先显示的类型，默认“其他”。使用“管理目录类型”选择；仅影响新目录。"
+  "settings.folderTypes.description": "常用自定义目录类型。创建自定义类型时自动保存到此列表；类型选项由内置类型和此列表组成。",
+  "settings.defaultFolderType.description": "添加目录时优先显示的内置或已配置自定义类型。使用“管理目录类型”选择；未配置的类型按“其他”处理。"
 }

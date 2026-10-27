@@ -244,10 +244,10 @@ export function dashboardHtml(webview: vscode.Webview, extensionUri: vscode.Uri)
 			<div class="stage-tools">
 				<div id="filters" class="filters" role="toolbar" aria-label="${escapeHtml(t("Filter by type"))}"></div>
                 <div class="fold-actions">
-                    <button type="button" class="text-action" data-action="add-client">${escapeHtml(t("Add client"))}</button>
-                    <button type="button" class="text-action" data-action="import">${escapeHtml(t("Import"))}</button>
-                    <button type="button" class="text-action" data-action="export">${escapeHtml(t("Back up"))}</button>
-                    <button type="button" class="text-action" data-action="manage-types">${escapeHtml(t("Folder types"))}</button>
+                    <button type="button" class="action-button" data-action="add-client">${escapeHtml(t("Add client"))}</button>
+                    <button type="button" class="action-button" data-action="import">${escapeHtml(t("Import"))}</button>
+                    <button type="button" class="action-button" data-action="export">${escapeHtml(t("Back up"))}</button>
+                    <button type="button" class="action-button" data-action="manage-types">${escapeHtml(t("Folder types"))}</button>
                 </div>
 			</div>
 			<div id="list" class="stage-body"></div>

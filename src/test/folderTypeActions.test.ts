@@ -29,7 +29,7 @@ suite('folder type workflows', () => {
         const client = addClient(emptyCatalog(), { name: 'Client' });
         const project = addProject(client.catalog, client.client.id, { name: 'Project' });
         projectId = project.project.id;
-        const module = addModule(project.catalog, projectId, { name: 'Legacy', kind: 'Legacy', path: 'C:/legacy' });
+        const module = addModule(project.catalog, projectId, { name: 'Service', kind: 'Service', path: 'C:/service' });
         catalog = module.catalog;
         moduleId = module.module.id;
         settings = new Map([['defaultFolderType', 'builtin:api']]);
@@ -47,6 +47,18 @@ suite('folder type workflows', () => {
     });
 
     teardown(() => { sandbox.restore(); setLanguage(vscode.env.language); });
+
+    test('does not rewrite the selected default or assign an unsaved custom type after settings failure', async () => {
+        pick.onCall(0).resolves({ action: 'default' });
+        pick.onCall(1).resolves({ action: 'select', id: 'builtin:api' });
+        await actions.manageFolderTypes();
+        assert.equal(configUpdate.callCount, 0);
+        pick.onCall(2).resolves({ action: 'custom' });
+        input.resolves('Worker');
+        configUpdate.rejects(new Error('Settings unavailable'));
+        await assert.rejects(actions.setKind({ type: 'module', id: moduleId }), /Settings unavailable/);
+        assert.equal(update.callCount, 0);
+    });
 
     test('offers the configured default first when adding and saves its stable ID', async () => {
         sandbox.stub(vscode.window, 'showOpenDialog').resolves([vscode.Uri.file('C:/new')]);
@@ -72,7 +84,8 @@ suite('folder type workflows', () => {
         input.resolves(undefined);
         await actions.setKind({ type: 'module', id: moduleId });
         assert.equal(update.callCount, 1);
-        assert.equal(configUpdate.callCount, 0);
+        assert.equal(configUpdate.callCount, 1);
+        assert.deepEqual(settings.get('folderTypes'), ['Worker ✨']);
     });
 
     test('sets a custom default without changing existing folders and avoids nested management', async () => {
@@ -82,6 +95,7 @@ suite('folder type workflows', () => {
         input.resolves('Worker');
         await actions.manageFolderTypes();
         assert.equal(settings.get('defaultFolderType'), 'Worker');
+        assert.deepEqual(settings.get('folderTypes'), ['Worker']);
         assert.ok(!pick.secondCall.args[0].some((item: { action: string }) => item.action === 'manage'));
         assert.equal(configUpdate.firstCall.args[2], vscode.ConfigurationTarget.Global);
         assert.equal(JSON.stringify(catalog), before);

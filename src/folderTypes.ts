@@ -1,8 +1,6 @@
 import { t, type Message } from './i18n.js';
 import { DEFAULT_KIND_COLOR } from './constants.js';
-import type { Catalog } from './types.js';
-
-// Reserved IDs keep translated built-ins distinct from historical user-entered names.
+// Stable IDs keep display translations separate from the stored type.
 const BUILT_INS: ReadonlyArray<{ id: string; label: Message; color: string }> = [
     { id: 'builtin:frontend', label: 'Frontend', color: '#4c8dff' },
     { id: 'builtin:backend', label: 'Backend', color: '#3ddc97' },
@@ -20,7 +18,7 @@ export interface FolderTypeOption {
     id: string;
     label: string;
     color: string;
-    source: 'builtin' | 'saved' | 'used';
+    source: 'builtin' | 'saved';
 }
 
 export function folderTypeLabel(id: string): string {
@@ -45,25 +43,19 @@ export function customFolderTypes(value: unknown): string[] {
         .map(item => item.trim()).filter(item => !customTypeError(item)))];
 }
 
-export function defaultFolderType(value: unknown): string {
+export function defaultFolderType(value: unknown, saved: unknown = []): string {
     if (typeof value !== 'string' || !value.trim()) { return DEFAULT_FOLDER_TYPE; }
     const id = value.trim();
-    return BUILT_INS.some(item => item.id === id) || !customTypeError(id) ? id : DEFAULT_FOLDER_TYPE;
+    return BUILT_INS.some(item => item.id === id) || customFolderTypes(saved).includes(id) ? id : DEFAULT_FOLDER_TYPE;
 }
 
-export function folderTypeOptions(catalog: Catalog, saved: unknown, defaultId: string, current?: string): FolderTypeOption[] {
+export function folderTypeOptions(saved: unknown, defaultId: string, current?: string): FolderTypeOption[] {
     const options = new Map<string, FolderTypeOption>();
     for (const item of BUILT_INS) {
         options.set(item.id, { ...item, label: t(item.label), source: 'builtin' });
     }
     for (const id of customFolderTypes(saved)) {
         options.set(id, { id, label: id, color: DEFAULT_KIND_COLOR, source: 'saved' });
-    }
-    const used = catalog.clients.flatMap(client => client.projects.flatMap(project => project.modules.map(module => module.kind)));
-    for (const id of [...used, defaultId, ...(current ? [current] : [])]) {
-        if (!options.has(id)) {
-            options.set(id, { id, label: id, color: DEFAULT_KIND_COLOR, source: 'used' });
-        }
     }
     const priority = (id: string) => id === current ? 0 : id === defaultId ? 1 : 2;
     return [...options.values()].sort((left, right) => priority(left.id) - priority(right.id));

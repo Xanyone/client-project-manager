@@ -185,11 +185,35 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 button.primary,
-button.ghost {
-    height: 32px;
-    padding: 0 14px;
+button.ghost,
+.action-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 30px;
+    max-width: 100%;
+    padding: 5px 10px;
     border-radius: var(--radius);
     font-size: 12px;
+    line-height: 18px;
+    text-align: center;
+    text-decoration: none;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.action-button,
+button.ghost {
+    border: 1px solid var(--line);
+    background: var(--vscode-button-secondaryBackground, var(--rail));
+    color: var(--vscode-button-secondaryForeground, var(--fg));
+}
+
+.action-button:hover:not(:disabled),
+button.ghost:hover:not(:disabled) {
+    border-color: var(--vscode-contrastActiveBorder, var(--line));
+    background: var(--vscode-button-secondaryHoverBackground, var(--hover));
 }
 
 button.primary {
@@ -198,18 +222,13 @@ button.primary {
     color: var(--vscode-button-foreground);
 }
 
-button.primary:hover {
+button.primary:hover:not(:disabled) {
     background: var(--vscode-button-hoverBackground);
 }
 
-button.ghost {
-    border: 1px solid var(--line);
-    background: transparent;
-    color: var(--fg);
-}
-
-button.ghost:hover {
-    background: var(--hover);
+.action-button:active:not(:disabled),
+button.ghost:active:not(:disabled) {
+    filter: brightness(0.94);
 }
 
 .metrics {
@@ -379,10 +398,11 @@ button.ghost:hover {
 
 .fold-head {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 4px;
     min-height: 48px;
-    padding: 0 8px 0 4px;
+    padding: 6px 8px 6px 4px;
 }
 
 .fold-card.open > .fold-head {
@@ -391,8 +411,7 @@ button.ghost:hover {
 
 .fold-toggle,
 .module-open,
-.menu,
-.text-action {
+.menu {
     border: none;
     background: transparent;
     text-align: left;
@@ -400,7 +419,7 @@ button.ghost:hover {
 
 .fold-toggle {
     display: flex;
-    flex: 1;
+    flex: 1 1 200px;
     align-items: center;
     gap: 8px;
     min-width: 0;
@@ -410,10 +429,6 @@ button.ghost:hover {
 
 .fold-toggle > * {
     align-self: center;
-}
-
-.fold-toggle:hover {
-    background: color-mix(in srgb, var(--tone, var(--signal)) 8%, transparent);
 }
 
 .fold-toggle:hover .client-name,
@@ -438,9 +453,9 @@ button.ghost:hover {
 .fold-actions {
     display: flex;
     flex-wrap: wrap;
-    flex: none;
+    flex: 0 1 auto;
     align-items: center;
-    gap: 2px;
+    gap: 6px;
     min-width: 0;
     max-width: 100%;
     margin-left: auto;
@@ -524,8 +539,9 @@ button.ghost:hover {
 }
 
 .project-name {
-    flex: none;
-    max-width: 42%;
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 100%;
     font-size: 13px;
     line-height: 20px;
 }
@@ -550,19 +566,6 @@ button.ghost:hover {
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 18%, transparent);
 }
 
-.text-action {
-    flex: none;
-    padding: 4px 8px;
-    border-radius: 4px;
-    color: var(--muted);
-    font-size: 12px;
-}
-
-.text-action:hover {
-    background: var(--signal-soft);
-    color: var(--signal);
-}
-
 .menu:hover {
     background: var(--hover);
     color: var(--fg);
@@ -572,33 +575,17 @@ button.ghost:hover {
     display: grid;
     flex: none;
     place-items: center;
-    width: 24px;
-    height: 24px;
+    width: 30px;
+    height: 30px;
     padding: 0;
-    border-radius: 4px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
     color: var(--muted);
-    opacity: 0;
-    pointer-events: none;
-}
-
-.fold-head:hover .menu,
-.fold-head:focus-within .menu,
-.module-card:hover .menu,
-.module-card:focus-within .menu {
-    opacity: 1;
-    pointer-events: auto;
 }
 
 .module-window {
     min-width: 0;
     white-space: normal;
-}
-
-@media (hover: none) {
-    .menu {
-        opacity: 1;
-        pointer-events: auto;
-    }
 }
 
 .module-board {
@@ -697,13 +684,6 @@ button.ghost:hover {
     padding: 4px 12px 10px;
 }
 
-.module-actions .menu {
-    width: 28px;
-    height: 28px;
-    opacity: 1;
-    pointer-events: auto;
-}
-
 .module-board > .module-empty {
     grid-column: 1 / -1;
 }
@@ -732,7 +712,6 @@ button.ghost:hover {
 }
 
 .module-empty {
-    flex: 1 0 100%;
     padding-top: 0;
 }
 
@@ -800,7 +779,7 @@ button.ghost:hover {
     }
 
     .fold-toggle {
-        flex: 1 1 180px;
+        flex: 1 1 100%;
     }
 
     .fold-actions {
@@ -811,10 +790,6 @@ button.ghost:hover {
     .stage-tools > .fold-actions {
         margin-left: 0;
         max-width: 100%;
-    }
-
-    .project-name {
-        max-width: 70%;
     }
 
     .module-board {
