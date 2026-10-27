@@ -14,6 +14,8 @@ suite('dashboard interactions', () => {
         dom.window.dispatchEvent(new dom.window.MessageEvent('message', { data: { type: 'render', model: { clients: [{ id: 'c', name: 'customer', color: '#4c8dff', projects: [{ id: 'p', name: 'project', color: '#4c8dff', modules: [module('present', true), module('missing', false)] }] }], showPath: true } } }));
         const doc = dom.window.document;
         assert.equal(doc.querySelectorAll('.module-card').length, 2);
+        assert.equal(doc.querySelectorAll('.client-icon').length, 1);
+        assert.equal(doc.querySelector('.client-icon path')?.getAttribute('d'), 'M8 2.5a2 2 0 1 1 0 4 2 2 0 0 1 0-4z');
         (doc.querySelector('[data-action=filter-missing]') as HTMLElement).click();
         assert.equal(doc.querySelectorAll('.module-card').length, 1);
         assert.equal(doc.querySelector('.module-name')?.textContent, 'missing');

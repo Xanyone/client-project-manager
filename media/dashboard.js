@@ -285,8 +285,13 @@
 
     function clientIcon() {
         const svg = iconSvg('client-icon');
-        iconPath(svg, 'M8 3.2a2.15 2.15 0 1 1 0 4.3 2.15 2.15 0 0 1 0-4.3z');
-        iconPath(svg, 'M3.3 13.2c.55-2.35 2.25-3.6 4.7-3.6s4.15 1.25 4.7 3.6');
+        // Match the sidebar's organization icon: a central group with two supporting members.
+        iconPath(svg, 'M8 2.5a2 2 0 1 1 0 4 2 2 0 0 1 0-4z');
+        iconPath(svg, 'M3.5 5.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z');
+        iconPath(svg, 'M12.5 5.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z');
+        iconPath(svg, 'M4.5 13.5c.2-2.35 1.35-3.6 3.5-3.6s3.3 1.25 3.5 3.6');
+        iconPath(svg, 'M1.8 13.5c.15-1.55.9-2.5 2.3-2.8');
+        iconPath(svg, 'M14.2 13.5c-.15-1.55-.9-2.5-2.3-2.8');
         return svg;
     }
 
