@@ -30,6 +30,8 @@ suite('extension host', () => {
         assert.equal(configuration.inspect('showSidebar')?.defaultValue, false);
         const view = extension.packageJSON.contributes.views.clientProjectDashboard[0];
         assert.equal(view.when, 'config.clientProjectDashboard.showSidebar');
+        const container = extension.packageJSON.contributes.viewsContainers.activitybar[0];
+        assert.equal(container.when, 'config.clientProjectDashboard.showSidebar');
         assert.ok(vscode.window.tabGroups.all.some(group => group.tabs.some(tab =>
             tab.input instanceof vscode.TabInputWebview && tab.input.viewType.includes('clientProjectDashboard.panel'),
         )), 'Expected the dashboard tab to be opened by activation');

@@ -2,7 +2,7 @@
   "name": "client-project-dashboard",
   "displayName": "%extension.displayName%",
   "description": "%extension.description%",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "publisher": "Xanyone",
   "engines": {
     "vscode": "^1.140.0"
@@ -25,7 +25,8 @@
         {
           "id": "clientProjectDashboard",
           "title": "%views.container.title%",
-          "icon": "media/icon.svg"
+          "icon": "media/icon.svg",
+          "when": "config.clientProjectDashboard.showSidebar"
         }
       ]
     },

@@ -38,7 +38,7 @@ A客户
 
 用 VS Code 打开本目录，按 `F5`。扩展开发主机会自动打开仪表盘。
 
-默认仅显示仪表盘入口。如需分组树，在设置中启用 `clientProjectDashboard.showSidebar`，即可显示「客户项目」活动栏图标。将 `clientProjectDashboard.openOnStartup` 设为 `never` 可关闭自动打开；已有显式设置会保留。
+默认仅显示仪表盘入口。如需分组树，在设置中启用 `clientProjectDashboard.showSidebar`，然后重新加载窗口，即可显示「客户项目」活动栏图标。将 `clientProjectDashboard.openOnStartup` 设为 `never` 可关闭自动打开；已有显式设置会保留。
 
 也可以：
 

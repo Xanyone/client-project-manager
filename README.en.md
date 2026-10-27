@@ -12,7 +12,7 @@ The dashboard opens on startup by default. Press `Ctrl+Alt+G` (`Cmd+Alt+G` on ma
 
 Add a client, add a project, then select a folder to add a module. Give each module a custom type, such as Frontend, API, or Config. Search by name, type, description, or path; filter by type or missing paths. Click a folder to open it, or open an entire project as a multi-root workspace. Hold Ctrl/Cmd to invert the configured window behavior.
 
-The grouping sidebar is optional. Enable `clientProjectDashboard.showSidebar` to display its activity bar icon and use its tree and drag-and-drop controls.
+The grouping sidebar is optional. Enable `clientProjectDashboard.showSidebar` and reload the window to display its activity bar icon and use its tree and drag-and-drop controls.
 
 The interface follows VS Code's display language. Chinese locales use Simplified Chinese; other locales use English. User names, descriptions, paths, and custom module types remain unchanged.
 
