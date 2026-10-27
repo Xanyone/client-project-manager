@@ -76,6 +76,7 @@ suite('internationalization', () => {
                 assert.equal(doc.querySelector('.module-open')?.getAttribute('title'), language === 'en' ? 'Path does not exist: D:/客户' : '路径不存在：D:/客户');
                 assert.equal(doc.querySelector('.chip-count')?.textContent, '1');
                 assert.equal(doc.querySelector('.project-count')?.textContent, language === 'en' ? '1 folder' : '1 个目录');
+                assert.equal(doc.querySelector('[data-action=open-window]')?.textContent, language === 'en' ? 'Choose window' : '选择窗口');
             } finally {
                 dom.window.close();
             }

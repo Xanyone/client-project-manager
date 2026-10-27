@@ -183,7 +183,7 @@
         actions.append(
             el('span', 'project-count', countMessage("{0} folder", "{0} folders", project.modules.length)),
             actionButton(t("Open project"), 'text-action', 'open', project.id, 'project'),
-            actionButton(t("Choose window"), 'text-action', 'workspace', project.id, 'project'),
+            actionButton(t("Open as workspace"), 'text-action', 'workspace', project.id, 'project'),
             actionButton(t("Add folder"), 'text-action', 'add-module', project.id, 'project'),
             menuButton(t("Edit project"), 'edit', project.id, 'project'),
         );
@@ -240,7 +240,7 @@
         if (model.showPath) {
             open.append(el('span', 'module-path', module.path || ''));
         }
-        card.append(open, menuButton(t("Edit folder"), 'edit', module.id, 'module'));
+        card.append(open, actionButton(t("Choose window"), 'text-action module-window', 'open-window', module.id, 'module'), menuButton(t("Edit folder"), 'edit', module.id, 'module'));
         return card;
     }
 

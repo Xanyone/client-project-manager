@@ -17,6 +17,8 @@ suite('dashboard interactions', () => {
         (doc.querySelector('[data-action=filter-missing]') as HTMLElement).click();
         assert.equal(doc.querySelectorAll('.module-card').length, 1);
         assert.equal(doc.querySelector('.module-name')?.textContent, 'missing');
+        assert.equal(doc.querySelectorAll('[data-action=open-window]').length, 1);
+        assert.equal((doc.querySelector('[data-action=open-window]') as HTMLElement)?.dataset.nodeType, 'module');
         doc.querySelector('.module-open')?.dispatchEvent(new dom.window.MouseEvent('click', { bubbles: true, ctrlKey: true }));
         const last = messages.at(-1) as { type: string; id: string; invert: boolean };
         assert.equal(last.type, 'open');

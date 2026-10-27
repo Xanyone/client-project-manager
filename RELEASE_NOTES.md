@@ -1,4 +1,4 @@
-客户项目仪表盘 / Client Project Dashboard v0.3.2
+客户项目仪表盘 / Client Project Dashboard v0.3.3
 
 - 支持中英文国际化，语言跟随 VS Code，覆盖仪表盘、命令、设置和原生弹窗。
 - 默认自动打开仪表盘，分组侧栏默认隐藏；启用 `clientProjectDashboard.showSidebar` 可恢复侧栏。
@@ -8,6 +8,8 @@
 - `clientProjectDashboard.showSidebar` 默认开启。
 - 空窗口启动时自动打开仪表盘，已有工作区不会强行切换。
 - 首次空目录只显示一个添加客户入口，导入和备份在已有数据后显示。
+- 将“选择窗口”移动到目录卡片；项目栏的操作改为“以工作区打开”。
+- 添加客户后立即刷新侧栏，目录级按钮仅在悬停或聚焦时显示。
 
 The dashboard, commands, settings, dialogs, and errors now follow VS Code's display language (English and Simplified Chinese). The dashboard opens on startup by default, with the grouping sidebar hidden. Enable `clientProjectDashboard.showSidebar` to restore it, or set `clientProjectDashboard.openOnStartup` to `never` to disable auto-open. Existing explicit startup settings are preserved. English layouts now wrap correctly in narrow windows.
 

@@ -10,7 +10,7 @@ Download a `.vsix` from [GitHub Releases](https://github.com/Xanyone/project-das
 
 The dashboard opens automatically in an empty window by default. Existing workspaces are not forced to switch views. Press `Ctrl+Alt+G` (`Cmd+Alt+G` on macOS) or run **Client Projects: Open dashboard** to open it again.
 
-Add a client, add a project, then select a folder to add a module. Give each module a custom type, such as Frontend, API, or Config. Search by name, type, description, or path; filter by type or missing paths. Click a folder to open it, or open an entire project as a multi-root workspace. Hold Ctrl/Cmd to invert the configured window behavior.
+Add a client, add a project, then select a folder to add a module. Give each module a custom type, such as Frontend, API, or Config. Search by name, type, description, or path; filter by type or missing paths. Click a folder to open it, choose a window from its card, or open an entire project as a multi-root workspace. Hold Ctrl/Cmd to invert the configured window behavior.
 
 The grouping sidebar is enabled by default. If its activity bar icon is hidden, enable `clientProjectDashboard.showSidebar` and reload the window.
 

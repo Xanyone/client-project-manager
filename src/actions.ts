@@ -73,6 +73,7 @@ export class ProjectActions {
         if (!await this.store.update(created.catalog)) {
             return undefined;
         }
+        this.store.reload();
         void vscode.window.showInformationMessage(t("Added client \"{0}\"", created.client.name));
         return created.client.id;
     }
@@ -315,7 +316,7 @@ export class ProjectActions {
         await this.store.update(current => removeNode(current, resolved));
     }
 
-    async open(ref?: NodeRef, options?: { newWindow?: boolean; invert?: boolean }): Promise<void> {
+    async open(ref?: NodeRef, options?: { newWindow?: boolean; invert?: boolean; askWindow?: boolean }): Promise<void> {
         const resolved = await this.resolve(ref, 'module');
         if (!resolved) {
             return;
@@ -339,7 +340,17 @@ export class ProjectActions {
             }
         }
         const preferNew = vscode.workspace.getConfiguration(CONFIG_SECTION).get<boolean>('openInNewWindow', false);
-        const newWindow = options?.newWindow ?? (options?.invert ? !preferNew : preferNew);
+        let newWindow = options?.newWindow ?? (options?.invert ? !preferNew : preferNew);
+        if (options?.askWindow) {
+            const picked = await vscode.window.showQuickPick([
+                { label: t("Current window"), newWindow: false },
+                { label: t("New window"), newWindow: true },
+            ], { placeHolder: t("Choose window") });
+            if (!picked) {
+                return;
+            }
+            newWindow = picked.newWindow;
+        }
         await openPath(this.context, located.module.name, located.module.path, newWindow);
     }
 

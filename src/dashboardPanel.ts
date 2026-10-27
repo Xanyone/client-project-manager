@@ -134,6 +134,9 @@ export class DashboardPanel implements vscode.Disposable {
                 case 'open-new':
                     await this.actions.open(ref, { newWindow: true });
                     break;
+                case 'open-window':
+                    await this.actions.open(ref, { askWindow: true });
+                    break;
                 case 'add-client':
                     await this.actions.addClient();
                     break;
