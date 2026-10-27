@@ -19,4 +19,18 @@ Add a client, create a project under it, then add local folders to that project.
 
 The dashboard opens automatically in an empty window. You can also press `Ctrl+Alt+G` (`Cmd+Alt+G` on macOS) or run **Client Projects: Open dashboard** from the Command Palette.
 
+## VS Code settings
+
+Search for `Client Project Dashboard` in Settings:
+
+| Setting | Default | Description |
+| --- | --- | --- |
+| `clientProjectDashboard.openOnStartup` | `emptyWindow` | `never`, `emptyWindow`, or `always` |
+| `clientProjectDashboard.showSidebar` | `true` | Show the grouping sidebar |
+| `clientProjectDashboard.openInNewWindow` | `false` | Open folders in a new window; hold Ctrl/Cmd to invert |
+| `clientProjectDashboard.showPath` | `true` | Show paths on folder cards |
+| `clientProjectDashboard.storage` | `globalState` | Use `settings` to save the catalog in user settings for sync |
+| `clientProjectDashboard.folderTypes` | `[]` | Saved custom folder types, managed by the extension |
+| `clientProjectDashboard.defaultFolderType` | `builtin:other` | Type selected first when adding a folder |
+
 Download a `.vsix` from [GitHub Releases](https://github.com/Xanyone/project-dashboard/releases/latest), then choose **Install from VSIX** in VS Code's Extensions view. Requires VS Code 1.140.0 or later.
