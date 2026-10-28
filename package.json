@@ -2,7 +2,8 @@
   "name": "client-project-management",
   "displayName": "%extension.displayName%",
   "description": "%extension.description%",
-  "version": "0.4.2",
+  "version": "0.4.3",
+  "icon": "logo.png",
   "publisher": "Xanyone",
   "engines": {
     "vscode": "^1.140.0"
