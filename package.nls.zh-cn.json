@@ -1,5 +1,5 @@
 {
-  "extension.displayName": "客户项目仪表盘",
+  "extension.displayName": "客户项目管理",
   "extension.description": "按客户、项目、模块分组管理目录，并从仪表盘快速打开。",
   "views.container.title": "客户项目",
   "views.groups.name": "分组",
@@ -26,7 +26,7 @@
   "commands.refresh.title": "刷新",
   "commands.exportCatalog.title": "导出分组备份",
   "commands.importCatalog.title": "导入分组备份",
-  "configuration.title": "客户项目仪表盘",
+  "configuration.title": "客户项目管理",
   "settings.openOnStartup.never": "不自动打开",
   "settings.openOnStartup.emptyWindow": "只在没有打开文件夹时打开",
   "settings.openOnStartup.always": "每次启动都打开",

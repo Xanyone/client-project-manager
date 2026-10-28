@@ -1,5 +1,5 @@
 {
-  "extension.displayName": "Client Project Dashboard",
+  "extension.displayName": "Client Project Management",
   "extension.description": "Organize folders by client, project, and module, and open them from a dashboard.",
   "views.container.title": "Client Projects",
   "views.groups.name": "Groups",
@@ -26,7 +26,7 @@
   "commands.refresh.title": "Refresh",
   "commands.exportCatalog.title": "Export catalog backup",
   "commands.importCatalog.title": "Import catalog backup",
-  "configuration.title": "Client Project Dashboard",
+  "configuration.title": "Client Project Management",
   "settings.openOnStartup.never": "Never open automatically",
   "settings.openOnStartup.emptyWindow": "Open only in an empty window",
   "settings.openOnStartup.always": "Open on every startup",

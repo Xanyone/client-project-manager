@@ -1,4 +1,4 @@
-# Client Project Dashboard
+# Client Project Management
 
 [简体中文](README.zh-CN.md)
 
@@ -21,7 +21,7 @@ The dashboard opens automatically in an empty window. You can also press `Ctrl+A
 
 ## VS Code settings
 
-Search for `Client Project Dashboard` in Settings:
+Search for `Client Project Management` in Settings:
 
 | Setting | Default | Description |
 | --- | --- | --- |

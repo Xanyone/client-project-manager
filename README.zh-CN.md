@@ -1,4 +1,4 @@
-# 客户项目仪表盘
+# 客户项目管理
 
 [English](README.md)
 
@@ -21,7 +21,7 @@
 
 ## VS Code 设置
 
-在设置中搜索 `Client Project Dashboard`：
+在设置中搜索 `Client Project Management`：
 
 | 设置 | 默认值 | 说明 |
 | --- | --- | --- |

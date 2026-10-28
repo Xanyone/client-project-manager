@@ -37,7 +37,7 @@ export class DashboardPanel implements vscode.Disposable {
         }
         this.panel = vscode.window.createWebviewPanel(
             'clientProjectDashboard.panel',
-            t("Client Project Dashboard"),
+            t("Client Project Management"),
             vscode.ViewColumn.Active,
             {
                 enableScripts: true,
@@ -213,7 +213,7 @@ export function dashboardHtml(webview: vscode.Webview, extensionUri: vscode.Uri)
 	<meta http-equiv="Content-Security-Policy" content="${csp}">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="${css}">
-	<title>${escapeHtml(t("Client Project Dashboard"))}</title>
+	<title>${escapeHtml(t("Client Project Management"))}</title>
 </head>
 <body>
 	<div class="app">

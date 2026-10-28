@@ -1,5 +1,5 @@
 {
-  "name": "client-project-dashboard",
+  "name": "client-project-management",
   "displayName": "%extension.displayName%",
   "description": "%extension.description%",
   "version": "0.4.2",

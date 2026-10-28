@@ -11,7 +11,7 @@ suite('extension host', () => {
         }
     });
     test('activates the extension and registers every contributed command', async () => {
-        const extension = vscode.extensions.getExtension('Xanyone.client-project-dashboard');
+        const extension = vscode.extensions.getExtension('Xanyone.client-project-management');
         assert.ok(extension);
         await extension.activate();
         assert.equal(extension.isActive, true);
@@ -23,7 +23,7 @@ suite('extension host', () => {
     });
 
     test('opens the dashboard and enables the sidebar by default', async () => {
-        const extension = vscode.extensions.getExtension('Xanyone.client-project-dashboard')!;
+        const extension = vscode.extensions.getExtension('Xanyone.client-project-management')!;
         await extension.activate();
         const configuration = vscode.workspace.getConfiguration('clientProjectDashboard');
         assert.equal(configuration.inspect('openOnStartup')?.defaultValue, 'emptyWindow');
