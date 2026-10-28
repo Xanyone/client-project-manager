@@ -2,7 +2,7 @@
   "name": "client-project-manager",
   "displayName": "%extension.displayName%",
   "description": "%extension.description%",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "icon": "logo.png",
   "publisher": "Xanyone",
   "engines": {

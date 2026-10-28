@@ -1,14 +1,13 @@
-客户项目管理器 / Client Project Manager v0.4.3
+客户项目管理器 / Client Project Manager v0.4.4
 
-- 设置 Marketplace 扩展列表图标。
+- 扩展标识更新为 `Xanyone.client-project-manager`，与 GitHub 仓库名统一。
+- 统一显示名称、命令分类、设置标题及中英文文档中的产品名称。
+- 仓库主页、问题跟踪和 Release 下载链接更新到新仓库。
+- 移除客户和项目标题的整块悬停背景，统一主题按钮样式并让编辑入口常显。
+- 调整项目操作区和目录数量位置；空项目禁用打开并提示先添加目录，窄窗口布局更紧凑。
+- 目录类型选择只使用内置类型和当前配置；新建自定义类型自动保存，未配置默认类型使用“其他”。
+- 备份文件默认名称更新为 `client-project-manager-backup.json`。
 
-- 移除客户和项目标题的整块悬停背景，保留文字反馈和键盘焦点。
-- “打开项目”使用主按钮，“添加目录”等操作使用主题次按钮；编辑入口常显，操作边界清晰。
-- 项目目录数量移至标题区域，“以工作区打开”保留在编辑菜单，空项目禁用打开并提示先添加目录。
-- 优化窄窗口操作换行；目录卡片保留三列、两列和一列自适应布局。
-- 清理历史目录类型自动补入和旧仪表盘模型缓存回退。类型选择统一使用内置类型和当前常用配置，新建自定义类型自动保存。
-- 未配置的默认类型使用“其他”，相同默认值不重复写入；设置保存失败时不会给目录指派未保存的新类型。
+Dashboard headings no longer paint a block on hover. Theme-aware actions, project controls and narrow layouts were refined. Folder type selection now uses built-ins and current configuration, and new custom types are saved automatically.
 
-Dashboard actions now have theme-aware primary and secondary button styles, visible edit controls and disabled opening for empty projects. Project headings no longer paint a block on hover. Workspace options remain in the edit menu. Folder types come only from built-ins and current custom configuration, and new custom types are saved automatically. Old catalog type inference and cached-model restoration have been removed.
-
-验证：68 项完整测试通过；中英文、深浅主题、四种宽度共 16 种布局组合验证通过。
+完整 VS Code 测试通过（68 项）；类型检查、ESLint 和 VSIX 生产打包通过。npm 依赖审计未发现漏洞。

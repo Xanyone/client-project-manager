@@ -1,5 +1,17 @@
 # Change Log
 
+## 0.4.4 — 2026-10-28
+
+- 将 VS Code 扩展标识更新为 `Xanyone.client-project-manager`，与 GitHub 仓库名称保持一致。
+- 统一扩展显示名称、命令分类、设置标题、中英文说明及 GitHub 仓库链接。
+- 移除客户和项目标题的整块悬停背景，保留文字反馈和键盘焦点；统一主题按钮样式并让编辑入口常显。
+- 将项目目录数量移至标题区域，“以工作区打开”保留在编辑菜单；空项目禁用打开并提示先添加目录。
+- 优化窄窗口操作换行，目录卡片按宽度自适应三列、两列或一列。
+- 目录类型选择统一使用内置类型和当前常用配置；新建自定义类型自动保存，未配置的默认类型回退到“其他”。
+- 更新备份文件默认名称和发布标题；补充扩展标识、语言一致性和并发流程回归验证。
+
+The VS Code extension identifier is now `Xanyone.client-project-manager`, matching the GitHub repository. The display name, command category, settings title, localized descriptions and repository links are consistent. Dashboard actions and folder type workflows were refined, the backup filename and release title were updated, and regression checks cover the identifier, localization and concurrent workflows.
+
 ## 0.4.1 — 2026-10-27
 
 - 移除客户和项目标题区域的整块悬停背景，保留文字反馈、折叠交互和键盘焦点。
