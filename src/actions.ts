@@ -33,7 +33,7 @@ export class ProjectActions {
     async exportCatalog(): Promise<void> {
         const uri = await vscode.window.showSaveDialog({
             title: t("Back up catalog"), filters: { JSON: ['json'] },
-            defaultUri: vscode.Uri.file('project-dashboard-backup.json'),
+            defaultUri: vscode.Uri.file('client-project-manager-backup.json'),
         });
         if (!uri) { return; }
         await vscode.workspace.fs.writeFile(uri, Buffer.from(await this.store.backup(), 'utf8'));

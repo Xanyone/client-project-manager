@@ -1,4 +1,4 @@
-客户项目管理 / Client Project Management v0.4.3
+客户项目管理器 / Client Project Manager v0.4.3
 
 - 设置 Marketplace 扩展列表图标。
 

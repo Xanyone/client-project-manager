@@ -32,6 +32,10 @@ suite('internationalization', () => {
         const english = readJson('package.nls.json');
         const translated = readJson('package.nls.zh-cn.json');
         assert.deepEqual(readJson('package.nls.zh.json'), translated);
+        assert.equal(english['extension.displayName'], 'Client Project Manager');
+        assert.equal(translated['extension.displayName'], '客户项目管理器');
+        assert.equal(english['commands.category'], english['extension.displayName']);
+        assert.equal(translated['commands.category'], translated['extension.displayName']);
         for (const match of manifest.matchAll(/%([^%]+)%/g)) {
             assert.ok(english[match[1]], `Missing English manifest message: ${match[1]}`);
             assert.ok(translated[match[1]], `Missing Chinese manifest message: ${match[1]}`);

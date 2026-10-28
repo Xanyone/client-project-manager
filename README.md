@@ -1,4 +1,4 @@
-# Client Project Management
+# Client Project Manager
 
 [简体中文](README.zh-CN.md)
 
@@ -17,11 +17,11 @@ Organize local work by **client → project → folder** and quickly find and op
 
 Add a client, create a project under it, then add local folders to that project. Select a folder card to open it. Use **Open as workspace** on a client or project to open multiple folders together. Search, filter, and collapse groups in the dashboard.
 
-The dashboard opens automatically in an empty window. You can also press `Ctrl+Alt+G` (`Cmd+Alt+G` on macOS) or run **Client Projects: Open dashboard** from the Command Palette.
+The dashboard opens automatically in an empty window. You can also press `Ctrl+Alt+G` (`Cmd+Alt+G` on macOS) or run **Client Project Manager: Open dashboard** from the Command Palette.
 
 ## VS Code settings
 
-Search for `Client Project Management` in Settings:
+Search for `Client Project Manager` in Settings:
 
 | Setting | Default | Description |
 | --- | --- | --- |
@@ -33,4 +33,4 @@ Search for `Client Project Management` in Settings:
 | `clientProjectDashboard.folderTypes` | `[]` | Saved custom folder types, managed by the extension |
 | `clientProjectDashboard.defaultFolderType` | `builtin:other` | Type selected first when adding a folder |
 
-Download a `.vsix` from [GitHub Releases](https://github.com/Xanyone/project-dashboard/releases/latest), then choose **Install from VSIX** in VS Code's Extensions view. Requires VS Code 1.140.0 or later.
+Download a `.vsix` from [GitHub Releases](https://github.com/Xanyone/client-project-manager/releases/latest), then choose **Install from VSIX** in VS Code's Extensions view. Requires VS Code 1.140.0 or later.

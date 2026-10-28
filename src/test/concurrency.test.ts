@@ -18,7 +18,7 @@ suite('concurrent catalog transactions', () => {
     const stores: CatalogStore[] = [];
     setup(async () => {
         sandbox = sinon.createSandbox();
-        directory = await mkdtemp(join(tmpdir(), 'dashboard-concurrency-'));
+        directory = await mkdtemp(join(tmpdir(), 'client-project-manager-concurrency-'));
         sandbox.stub(vscode.workspace, 'getConfiguration').returns({ get: (_key: string, fallback: unknown) => fallback } as vscode.WorkspaceConfiguration);
         sandbox.stub(vscode.workspace, 'onDidChangeConfiguration').returns({ dispose() {} });
         sandbox.stub(vscode.window, 'showInformationMessage').resolves(undefined);

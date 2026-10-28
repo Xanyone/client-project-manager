@@ -1,5 +1,5 @@
 {
-  "name": "client-project-management",
+  "name": "client-project-manager",
   "displayName": "%extension.displayName%",
   "description": "%extension.description%",
   "version": "0.4.3",
@@ -409,11 +409,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Xanyone/project-dashboard.git"
+    "url": "https://github.com/Xanyone/client-project-manager.git"
   },
-  "homepage": "https://github.com/Xanyone/project-dashboard#readme",
+  "homepage": "https://github.com/Xanyone/client-project-manager#readme",
   "bugs": {
-    "url": "https://github.com/Xanyone/project-dashboard/issues"
+    "url": "https://github.com/Xanyone/client-project-manager/issues"
   },
   "license": "MIT",
   "dependencies": {

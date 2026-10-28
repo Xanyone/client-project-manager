@@ -1,4 +1,4 @@
-# 客户项目管理
+# 客户项目管理器
 
 [English](README.md)
 
@@ -17,11 +17,11 @@
 
 添加客户，在客户下添加项目，再把本地文件夹添加为目录。单击目录卡片可打开该目录；项目或客户的“以工作区打开”操作可一次打开其中的多个目录。仪表盘支持搜索、筛选和折叠分组。
 
-仪表盘默认在空窗口启动。也可按 `Ctrl+Alt+G`（macOS 为 `Cmd+Alt+G`），或从命令面板执行“客户项目: 打开仪表盘”。
+仪表盘默认在空窗口启动。也可按 `Ctrl+Alt+G`（macOS 为 `Cmd+Alt+G`），或从命令面板执行“客户项目管理器: 打开仪表盘”。
 
 ## VS Code 设置
 
-在设置中搜索 `Client Project Management`：
+在设置中搜索 `Client Project Manager`：
 
 | 设置 | 默认值 | 说明 |
 | --- | --- | --- |
@@ -33,4 +33,4 @@
 | `clientProjectDashboard.folderTypes` | `[]` | 常用自定义目录类型，由扩展自动维护 |
 | `clientProjectDashboard.defaultFolderType` | `builtin:other` | 添加目录时优先选中的类型 |
 
-从 [GitHub Releases](https://github.com/Xanyone/project-dashboard/releases/latest) 下载 `.vsix`，然后在 VS Code 扩展面板中选择“从 VSIX 安装”。需要 VS Code 1.140.0 或更新版本。
+从 [GitHub Releases](https://github.com/Xanyone/client-project-manager/releases/latest) 下载 `.vsix`，然后在 VS Code 扩展面板中选择“从 VSIX 安装”。需要 VS Code 1.140.0 或更新版本。

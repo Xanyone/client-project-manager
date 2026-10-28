@@ -20,4 +20,4 @@ jobs:
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create $env:GITHUB_REF_NAME *.vsix --title "客户项目仪表盘 $env:GITHUB_REF_NAME" --notes-file RELEASE_NOTES.md --verify-tag
+        run: gh release create $env:GITHUB_REF_NAME *.vsix --title "客户项目管理器 $env:GITHUB_REF_NAME" --notes-file RELEASE_NOTES.md --verify-tag

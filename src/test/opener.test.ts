@@ -11,7 +11,7 @@ import { pathInspector } from '../pathInspector.js';
 suite('workspace opening', () => {
     test('generates distinct workspaces for equal titles with different folders', async () => {
         const sandbox = sinon.createSandbox();
-        const directory = await mkdtemp(join(tmpdir(), 'project-dashboard-test-'));
+        const directory = await mkdtemp(join(tmpdir(), 'client-project-manager-test-'));
         try {
             const execute = sandbox.stub(vscode.commands, 'executeCommand').resolves();
             const context = { globalStorageUri: vscode.Uri.file(directory) } as vscode.ExtensionContext;
@@ -37,7 +37,7 @@ suite('workspace opening', () => {
 
     test('deduplicates folders and tolerates unavailable recent-list commands', async () => {
         const sandbox = sinon.createSandbox();
-        const directory = await mkdtemp(join(tmpdir(), 'dashboard-open-'));
+        const directory = await mkdtemp(join(tmpdir(), 'client-project-manager-open-'));
         try {
             const execute = sandbox.stub(vscode.commands, 'executeCommand').callsFake(async command => {
                 if (command !== 'vscode.openFolder') { throw new Error('command unavailable'); }
@@ -54,7 +54,7 @@ suite('workspace opening', () => {
 
     test('cleans only old generated workspaces when window state is known', async () => {
         const sandbox = sinon.createSandbox();
-        const directory = await mkdtemp(join(tmpdir(), 'dashboard-clean-'));
+        const directory = await mkdtemp(join(tmpdir(), 'client-project-manager-clean-'));
         try {
             sandbox.stub(vscode.commands, 'executeCommand').resolves();
             const root = join(directory, 'extension');
