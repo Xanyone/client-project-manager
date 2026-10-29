@@ -389,7 +389,9 @@ export class ProjectActions {
         }
         const name = nodeLabel(this.store.get(), resolved);
         const choice = await vscode.window.showWarningMessage(
-            t("Delete \"{0}\" and all its projects and modules?", name),
+            resolved.type === 'module'
+                ? t('Delete folder "{0}"?', name)
+                : t("Delete \"{0}\" and all its projects and modules?", name),
             { modal: true },
             t("Delete"),
         );

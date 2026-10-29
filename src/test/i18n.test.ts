@@ -105,7 +105,9 @@ suite('internationalization', () => {
                 await actions.remove({ type: 'client', id: client.client.id });
                 assert.equal(warning.firstCall.args[0], t('Delete "{0}" and all its projects and modules?', '原始客户'));
                 assert.equal(warning.firstCall.args[2], language === 'en' ? 'Delete' : '删除');
-                assert.equal(update.callCount, 1);
+                await actions.remove({ type: 'module', id: module.module.id });
+                assert.equal(warning.secondCall.args[0], t('Delete folder "{0}"?', '原始模块'));
+                assert.equal(update.callCount, 2);
             } finally {
                 sandbox.restore();
             }

@@ -60,10 +60,23 @@ suite('catalog', () => {
         assert.equal(next.clients[0].projects[0].name, 'C项目');
     });
 
+    test('rejects deleting a missing item or an ID with the wrong node type', () => {
+        const seeded = seed();
+        for (const ref of [
+            { type: 'client' as const, id: 'missing' },
+            { type: 'client' as const, id: seeded.projectB },
+            { type: 'project' as const, id: seeded.backend },
+            { type: 'module' as const, id: seeded.clientId },
+        ]) {
+            assert.throws(() => removeNode(seeded.catalog, ref), /Item to edit not found|找不到要编辑的项目/);
+        }
+    });
+
     test('does not move the first client upward', () => {
         const seeded = seed();
         const next = moveNode(seeded.catalog, { type: 'client', id: seeded.clientId }, 'up');
         assert.equal(next.clients[0].id, seeded.clientId);
+        assert.throws(() => moveNode(seeded.catalog, { type: 'client', id: 'missing' }, 'up'), /Item to edit not found|找不到要编辑的项目/);
     });
 
     test('moves a module into another project', () => {

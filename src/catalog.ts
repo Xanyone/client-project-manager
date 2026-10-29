@@ -183,6 +183,9 @@ export function setModuleKind(catalog: Catalog, ref: NodeRef, kind: ModuleKind):
 }
 
 export function removeNode(catalog: Catalog, ref: NodeRef): Catalog {
+    if (!findNode(catalog, ref)) {
+        throw new Error(t("Item to edit not found"));
+    }
     if (ref.type === 'client') {
         return { ...catalog, clients: catalog.clients.filter(client => client.id !== ref.id) };
     }
@@ -208,6 +211,9 @@ export function removeNode(catalog: Catalog, ref: NodeRef): Catalog {
 }
 
 export function moveNode(catalog: Catalog, ref: NodeRef, direction: 'up' | 'down'): Catalog {
+    if (!findNode(catalog, ref)) {
+        throw new Error(t("Item to edit not found"));
+    }
     if (ref.type === 'client') {
         return { ...catalog, clients: moveBy(catalog.clients, ref.id, direction) };
     }

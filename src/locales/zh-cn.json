@@ -123,6 +123,7 @@
   "Added client \"{0}\"": "已添加客户「{0}」",
   "Added project \"{0}\"": "已添加项目「{0}」",
   "Delete \"{0}\" and all its projects and modules?": "删除「{0}」？其下的项目和模块也会一并删除。",
+  "Delete folder \"{0}\"?": "删除目录「{0}」？",
   "Path does not exist: {0}": "路径不存在：{0}",
   "{0} folders": "{0} 个目录",
   "Open \"{0}\"": "打开「{0}」",
