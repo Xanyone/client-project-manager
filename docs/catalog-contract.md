@@ -45,15 +45,7 @@ Manual settings edits, Settings Sync and older extension versions do not partici
 
 Use `store.update(current => addModule(current, projectId, input).catalog)`. Never compute a full replacement from `store.get()` before waiting in the transaction queue. Never implement a separate UI-only uniqueness rule or offer to bypass a conflict. Do not lowercase POSIX/remote paths. Do not delete old workspace files unless window state is available and the generated file is old and inactive.
 
-## Folder type contract
-
-`ModuleEntry.kind` is a nonempty string in catalog version 1. Built-ins use reserved `builtin:*` IDs defined in `src/folderTypes.ts`; the helpers resolve their translated labels and preset colors. Custom names display literally.
-
-`folderTypeOptions(saved, defaultId, current?)` combines built-ins and validated custom configuration only. It deduplicates by exact ID, preserving configured-current-first/default-second ordering. Catalog types, unknown default/current IDs and cached models do not add options. `defaultFolderType(value, saved)` accepts a built-in or a configured custom ID, otherwise returning `builtin:other`. Labels and colors resolve through shared helpers in the native picker, sidebar, dashboard cards and filter model. Search uses the display label and stored ID; filters use the stored ID. The Webview consumes the host's current `kinds` array directly, without legacy model inference or model-cache restoration.
-
-The application-scoped user settings `folderTypes` and `defaultFolderType` own choices and initial ordering. New custom input is saved to `folderTypes` before assigning it or making it the default; settings failure prevents the assignment. If a later catalog write fails, the custom type remains as an available saved preference. Type assignments go through functional `store.update` operations. Cancelled or unchanged edits never write. Custom UI input is trimmed, nonempty, at most 80 UTF-16 code units, and cannot start with `builtin:`. Removing a saved type retains catalog assignments but removes its picker choice; removing the saved default resets it to `builtin:other` before removing its saved choice. Preference write failures propagate to the existing command/Webview error handlers.
-
-`folderTypes.test.ts` covers configuration validation, locale labels, stable IDs and JSON round trips; `folderTypeActions.test.ts` covers defaults, custom reuse, cancellation, management, failed settings writes and consistency between the native sidebar and Webview model. Dashboard tests cover empty-project disabled actions, isolated fold controls and cache removal.
+Module catalog entries contain identity, name, path, color and description. Dashboard tests cover missing-path filtering, escaped labels, empty catalogs, and view-state persistence.
 
 ## Regression gates
 

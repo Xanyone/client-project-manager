@@ -1,6 +1,5 @@
 export const CATALOG_VERSION = 1;
 
-export type ModuleKind = string;
 export type NodeType = 'client' | 'project' | 'module';
 
 export interface NodeRef {
@@ -11,7 +10,6 @@ export interface NodeRef {
 export interface ModuleEntry {
     id: string;
     name: string;
-    kind: ModuleKind;
     path: string;
     color?: string;
     description?: string;
@@ -45,7 +43,6 @@ export interface NamedInput {
 }
 
 export interface ModuleInput extends NamedInput {
-    kind: ModuleKind;
     path: string;
 }
 
@@ -62,8 +59,6 @@ export interface FolderLocation {
 export interface DashboardModule {
     id: string;
     name: string;
-    kind: ModuleKind;
-    kindLabel: string;
     path: string;
     description: string;
     color: string;
@@ -87,16 +82,9 @@ export interface DashboardClient {
     projects: DashboardProject[];
 }
 
-export interface DashboardKind {
-    id: string;
-    label: string;
-    color: string;
-}
-
 export interface DashboardModel {
     openInNewWindow: boolean;
     showPath: boolean;
-    kinds: DashboardKind[];
     clients: DashboardClient[];
 }
 

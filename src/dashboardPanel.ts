@@ -2,9 +2,8 @@ import { getLanguage, getMessages, t } from './i18n.js';
 import * as vscode from 'vscode';
 import { randomBytes } from 'node:crypto';
 import type { ProjectActions } from './actions.js';
-import { CONFIG_SECTION, colorAt } from './constants.js';
+import { CONFIG_SECTION, DEFAULT_MODULE_COLOR, colorAt } from './constants.js';
 import { pathInspector } from './pathInspector.js';
-import { folderTypeColor, folderTypeLabel } from './folderTypes.js';
 import type { CatalogStore } from './store.js';
 import {
     type DashboardModel,
@@ -80,17 +79,9 @@ export class DashboardPanel implements vscode.Disposable {
             project.modules.map(async module => [module.path, await pathInspector.inspect(module.path)] as const),
         ))));
         const config = vscode.workspace.getConfiguration(CONFIG_SECTION);
-        const kinds = [...new Set(catalog.clients.flatMap(client =>
-            client.projects.flatMap(project => project.modules.map(module => module.kind)),
-        ))];
         return {
             openInNewWindow: config.get<boolean>('openInNewWindow', false),
             showPath: config.get<boolean>('showPath', true),
-            kinds: kinds.map(kind => ({
-                id: kind,
-                label: folderTypeLabel(kind),
-                color: folderTypeColor(kind),
-            })),
             clients: catalog.clients.map((client, clientIndex) => ({
                 id: client.id,
                 name: client.name,
@@ -106,11 +97,9 @@ export class DashboardPanel implements vscode.Disposable {
                         return {
                             id: module.id,
                             name: module.name,
-                            kind: module.kind,
-                            kindLabel: folderTypeLabel(module.kind),
                             path: module.path,
                             description: module.description ?? '',
-                            color: module.color ?? folderTypeColor(module.kind),
+                            color: module.color ?? DEFAULT_MODULE_COLOR,
                             exists: inspected.exists,
                             git: inspected.git,
                         };
@@ -158,9 +147,6 @@ export class DashboardPanel implements vscode.Disposable {
                     break;
                 case 'add-module':
                     await this.actions.addModule(ref?.type === 'project' ? ref.id : undefined);
-                    break;
-                case 'manage-types':
-                    await this.actions.manageFolderTypes();
                     break;
                 case 'edit':
                     await this.actions.edit(ref);
@@ -242,12 +228,11 @@ export function dashboardHtml(webview: vscode.Webview, extensionUri: vscode.Uri)
 		</header>
 		<div class="shell" id="stage">
 			<div class="stage-tools">
-				<div id="filters" class="filters" role="toolbar" aria-label="${escapeHtml(t("Filter by type"))}"></div>
+                <div id="filters" class="filters" role="toolbar" aria-label="${escapeHtml(t("Filter by missing paths"))}"></div>
                 <div class="fold-actions">
                     <button type="button" class="action-button" data-action="add-client">${escapeHtml(t("Add client"))}</button>
                     <button type="button" class="action-button" data-action="import">${escapeHtml(t("Import"))}</button>
                     <button type="button" class="action-button" data-action="export">${escapeHtml(t("Back up"))}</button>
-                    <button type="button" class="action-button" data-action="manage-types">${escapeHtml(t("Folder types"))}</button>
                 </div>
 			</div>
 			<div id="list" class="stage-body"></div>

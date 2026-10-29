@@ -70,15 +70,15 @@ suite('internationalization', () => {
                 dom.window.eval(readFileSync(resolve(__dirname, '../../media/dashboard.js'), 'utf8'));
                 assert.equal(doc.querySelector('.empty h2')?.textContent, language === 'en' ? 'Start by adding a client' : '从添加客户开始');
                 dom.window.dispatchEvent(new dom.window.MessageEvent('message', { data: {
-                    type: 'render', model: { kinds: [{ id: 'toString', label: '自定义 API', color: '#8b9bb4' }], clients: [{ id: 'c', name: '客户 & Client', color: '#4c8dff', projects: [{ id: 'p', name: '项目', color: '#4c8dff', modules: [
-                        { id: 'm', name: '<img src=x> 📦', kind: 'toString', kindLabel: '自定义 API', path: 'D:/客户', exists: false, color: '#8b9bb4' },
+                    type: 'render', model: { clients: [{ id: 'c', name: '客户 & Client', color: '#4c8dff', projects: [{ id: 'p', name: '项目', color: '#4c8dff', modules: [
+                        { id: 'm', name: '<img src=x> 📦', path: 'D:/客户', exists: false, color: '#8b9bb4' },
                     ] }] }], showPath: true },
                 } }));
                 assert.equal(doc.querySelector('.client-name')?.textContent, '客户 & Client');
                 assert.equal(doc.querySelector('.module-name')?.textContent, '<img src=x> 📦');
                 assert.equal(doc.querySelectorAll('img').length, 0);
                 assert.equal(doc.querySelector('.module-open')?.getAttribute('title'), language === 'en' ? 'Path does not exist: D:/客户' : '路径不存在：D:/客户');
-                assert.equal(doc.querySelector('.chip-count')?.textContent, '1');
+                assert.equal(doc.querySelector('.module-name')?.textContent, '<img src=x> 📦');
                 assert.equal(doc.querySelector('.project-count')?.textContent, language === 'en' ? '1 folder' : '1 个目录');
                 assert.equal(doc.querySelector('[data-action=open-window]')?.textContent, language === 'en' ? 'Choose window' : '选择窗口');
             } finally {
@@ -92,14 +92,10 @@ suite('internationalization', () => {
             try {
                 const client = addClient(emptyCatalog(), { name: '原始客户' });
                 const project = addProject(client.catalog, client.client.id, { name: '原始项目' });
-                const module = addModule(project.catalog, project.project.id, { name: '原始模块', kind: '原始类型', path: 'D:/module' });
+                const module = addModule(project.catalog, project.project.id, { name: '原始模块', path: 'D:/module' });
                 const update = sandbox.stub().resolves(true);
                 const store = { get: () => module.catalog, update } as unknown as CatalogStore;
                 const actions = new ProjectActions({} as vscode.ExtensionContext, store);
-                const picker = sandbox.stub(vscode.window, 'showQuickPick').resolves(undefined);
-                await actions.setKind({ type: 'module', id: module.module.id });
-                assert.equal(picker.firstCall.args[1]?.title, language === 'en' ? 'Folder type' : '目录类型');
-                assert.ok(!(picker.firstCall.args[0] as vscode.QuickPickItem[]).some(item => item.label === '原始类型'));
                 const warning: sinon.SinonStub = sandbox.stub(vscode.window, 'showWarningMessage');
                 warning.resolves(t('Delete'));
                 await actions.remove({ type: 'client', id: client.client.id });

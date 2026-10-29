@@ -7,10 +7,10 @@ Organize local work by **client → project → folder** and quickly find and op
 ## Features
 
 - Manage clients, projects, and folders in the dashboard or sidebar
-- Search names, types, descriptions, and paths; filter by folder type or missing paths
+- Search names, descriptions, and paths; filter by missing paths
 - Open an individual folder or open a client's or project's folders as a multi-root workspace
 - Reorder items by dragging, or drag folders into the sidebar
-- Add colors and descriptions, and assign built-in or custom folder types
+- Add colors and descriptions
 - Import and export catalogs for backup or migration
 
 ## Use
@@ -30,7 +30,5 @@ Search for `Client Project Manager` in Settings:
 | `clientProjectDashboard.openInNewWindow` | `false` | Open folders in a new window; hold Ctrl/Cmd to invert |
 | `clientProjectDashboard.showPath` | `true` | Show paths on folder cards |
 | `clientProjectDashboard.storage` | `globalState` | Use `settings` to save the catalog in user settings for sync |
-| `clientProjectDashboard.folderTypes` | `[]` | Saved custom folder types, managed by the extension |
-| `clientProjectDashboard.defaultFolderType` | `builtin:other` | Type selected first when adding a folder |
 
 Download a `.vsix` from [GitHub Releases](https://github.com/Xanyone/client-project-manager/releases/latest), then choose **Install from VSIX** in VS Code's Extensions view. Requires VS Code 1.140.0 or later.

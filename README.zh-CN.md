@@ -7,10 +7,10 @@
 ## 功能
 
 - 在仪表盘或侧边栏按客户、项目和目录分组管理
-- 搜索名称、类型、说明和路径，并按目录类型或缺失路径筛选
+- 搜索名称、说明和路径，并按路径缺失状态筛选
 - 打开单个目录，或将项目、客户下的目录作为多根工作区打开
 - 拖拽调整顺序，也可将文件夹拖入侧边栏
-- 为条目设置颜色和说明，为目录设置内置或自定义类型
+- 为条目设置颜色和说明
 - 导入和导出目录清单，方便备份或迁移
 
 ## 使用
@@ -30,7 +30,5 @@
 | `clientProjectDashboard.openInNewWindow` | `false` | 打开目录时使用新窗口；按住 `Ctrl` / `Cmd` 可反向切换 |
 | `clientProjectDashboard.showPath` | `true` | 在目录卡片上显示路径 |
 | `clientProjectDashboard.storage` | `globalState` | 使用 `settings` 将目录清单保存在用户设置中，以便同步 |
-| `clientProjectDashboard.folderTypes` | `[]` | 常用自定义目录类型，由扩展自动维护 |
-| `clientProjectDashboard.defaultFolderType` | `builtin:other` | 添加目录时优先选中的类型 |
 
 从 [GitHub Releases](https://github.com/Xanyone/client-project-manager/releases/latest) 下载 `.vsix`，然后在 VS Code 扩展面板中选择“从 VSIX 安装”。需要 VS Code 1.140.0 或更新版本。

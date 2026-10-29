@@ -41,8 +41,6 @@ export function registerCommands(
         vscode.commands.registerCommand(COMMANDS.addModule, bind(ref => actions.addModule(ref?.type === 'project' ? ref.id : undefined))),
         vscode.commands.registerCommand(COMMANDS.rename, bind(ref => actions.rename(ref))),
         vscode.commands.registerCommand(COMMANDS.setColor, bind(ref => actions.setColor(ref))),
-        vscode.commands.registerCommand(COMMANDS.setKind, bind(ref => actions.setKind(ref))),
-        vscode.commands.registerCommand(COMMANDS.manageFolderTypes, bind(() => actions.manageFolderTypes())),
         vscode.commands.registerCommand(COMMANDS.setPath, bind(ref => actions.setPath(ref))),
         vscode.commands.registerCommand(COMMANDS.setDescription, bind(ref => actions.setDescription(ref))),
         vscode.commands.registerCommand(COMMANDS.edit, bind(ref => actions.edit(ref))),

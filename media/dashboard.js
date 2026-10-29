@@ -15,9 +15,8 @@
     }
     const vscode = acquireVsCodeApi();
     const previous = vscode.getState() || {};
-    let model = { clients: [], kinds: [], openInNewWindow: false, showPath: true };
+    let model = { clients: [], openInNewWindow: false, showPath: true };
     let query = previous.query || '';
-    let kindFilter = previous.kindFilter || '';
     let missingOnly = previous.missingOnly === true;
     let folded = previous.folded && typeof previous.folded === 'object' ? previous.folded : {};
     let searchTimer;
@@ -42,9 +41,6 @@
             return;
         }
         model = message.model || model;
-        if (kindFilter && !model.kinds.some(function (kind) { return kind.id === kindFilter; })) {
-            kindFilter = '';
-        }
         persist();
         render();
     });
@@ -59,7 +55,6 @@
     function persist() {
         vscode.setState({
             query: query,
-            kindFilter: kindFilter,
             missingOnly: missingOnly,
             folded: folded,
         });
@@ -72,7 +67,7 @@
         const listScroll = list.scrollTop;
 
         renderMetrics(count(clients));
-        renderFilters(model.kinds, kindCounts(searched));
+        renderFilters();
         filters.hidden = clients.length === 0;
         if (tools) {
             tools.hidden = false;
@@ -98,14 +93,8 @@
         );
     }
 
-    function renderFilters(kinds, counts) {
-        filters.replaceChildren(filterChip(null, !kindFilter, counts));
-        kinds.forEach(function (kind) {
-            const chip = filterChip(kind, kindFilter === kind.id, counts);
-            if (chip) {
-                filters.append(chip);
-            }
-        });
+    function renderFilters() {
+        filters.replaceChildren();
         const missing = actionButton(t("Missing only"), missingOnly ? 'chip active' : 'chip', 'filter-missing', '', '');
         missing.setAttribute('aria-pressed', String(missingOnly));
         filters.append(missing);
@@ -120,7 +109,7 @@
             list.append(noMatch());
             return;
         }
-        if ((kindFilter || missingOnly) && view.length === 0) {
+        if (missingOnly && view.length === 0) {
             list.append(filterEmpty());
             return;
         }
@@ -228,10 +217,7 @@
         const heading = el('span', 'module-heading');
         heading.append(el('span', 'module-name', module.name));
         const tags = el('span', 'module-tags');
-        const kind = el('span', 'module-kind');
-        kind.append(tick(module.color), document.createTextNode(module.kindLabel || t("Folder")));
-        tags.append(kind);
-        kind.title = module.kindLabel || t("Folder");
+        tags.append(tick(module.color));
         if (module.git) {
             tags.append(el('span', 'tag', 'Git'));
         }
@@ -360,30 +346,6 @@
         return node;
     }
 
-    function filterChip(kind, pressed, counts) {
-        const button = el('button', pressed ? 'chip active' : 'chip');
-        button.type = 'button';
-        button.dataset.action = 'filter-kind';
-        button.dataset.kind = kind ? kind.id : '';
-        button.setAttribute('aria-pressed', pressed ? 'true' : 'false');
-        if (!kind) {
-            const total = Object.keys(counts).reduce(function (sum, key) {
-                return sum + counts[key];
-            }, 0);
-            button.append(document.createTextNode(t("All")), el('span', 'chip-count', numbers.format(total)));
-            return button;
-        }
-        const countForKind = counts[kind.id] || 0;
-        if (countForKind === 0 && kindFilter !== kind.id) {
-            return null;
-        }
-        const swatch = el('span', 'swatch');
-        swatch.style.background = safeColor(kind.color);
-        button.title = kind.label;
-        button.append(swatch, el('span', 'chip-label', kind.label), el('span', 'chip-count', numbers.format(countForKind)));
-        return button;
-    }
-
     function metric(value, label) {
         const node = el('span', 'metric');
         node.append(el('span', 'metric-label', label), el('strong', null, numbers.format(value)));
@@ -412,7 +374,7 @@
     function filterEmpty() {
         const box = el('div', 'filter-empty');
         box.append(el('h2', null, t("No folders match the filters")));
-        box.append(el('p', null, t("Choose another type or clear the filters.")));
+        box.append(el('p', null, t("Clear the missing-path filter.")));
         const clear = el('button', 'ghost', t("Clear filters"));
         clear.type = 'button';
         clear.dataset.action = 'clear-filters';
@@ -447,13 +409,6 @@
             render();
             return;
         }
-        if (action === 'filter-kind') {
-            const next = actionEl.dataset.kind || '';
-            kindFilter = kindFilter === next ? '' : next;
-            persist();
-            render();
-            return;
-        }
         if (action === 'clear-query') {
             query = '';
             search.value = '';
@@ -463,7 +418,6 @@
             return;
         }
         if (action === 'clear-filters') {
-            kindFilter = '';
             missingOnly = false;
             persist();
             render();
@@ -473,7 +427,6 @@
             type: action,
             id: actionEl.dataset.id || '',
             nodeType: actionEl.dataset.nodeType || '',
-            kind: actionEl.dataset.kind || '',
             direction: actionEl.dataset.direction || '',
             invert: event.ctrlKey || event.metaKey,
         });
@@ -509,24 +462,24 @@
     }
 
     function isOpen(nodeType, id) {
-        if (query.trim() || kindFilter || missingOnly) {
+        if (query.trim() || missingOnly) {
             return true;
         }
         return !folded[nodeType + ':' + id];
     }
 
     function isFiltering() {
-        return query.trim().length > 0 || kindFilter.length > 0 || missingOnly;
+        return query.trim().length > 0 || missingOnly;
     }
 
     function applyFilters(clients) {
-        if (!kindFilter && !missingOnly) {
+        if (!missingOnly) {
             return clients;
         }
         return clients.reduce(function (result, client) {
             const projects = client.projects.reduce(function (matched, project) {
                 const modules = project.modules.filter(function (module) {
-                    return (!kindFilter || module.kind === kindFilter) && (!missingOnly || !module.exists);
+                    return !module.exists;
                 });
                 if (modules.length > 0) {
                     matched.push(Object.assign({}, project, { modules: modules }));
@@ -558,9 +511,7 @@
                 const modules = project.modules.filter(function (module) {
                     return includes(module.name, needle)
                         || includes(module.path, needle)
-                        || includes(module.description, needle)
-                        || includes(module.kindLabel, needle)
-                        || includes(module.kind, needle);
+                        || includes(module.description, needle);
                 });
                 if (modules.length > 0) {
                     matched.push(Object.assign({}, project, { modules: modules }));
@@ -588,18 +539,6 @@
             });
             return total;
         }, { clients: 0, projects: 0, modules: 0, missing: 0 });
-    }
-
-    function kindCounts(clients) {
-        const counts = Object.create(null);
-        clients.forEach(function (client) {
-            client.projects.forEach(function (project) {
-                project.modules.forEach(function (module) {
-                    counts[module.kind] = (counts[module.kind] || 0) + 1;
-                });
-            });
-        });
-        return counts;
     }
 
     function includes(value, needle) {

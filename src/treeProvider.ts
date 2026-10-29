@@ -4,7 +4,6 @@ import type { ProjectActions } from './actions.js';
 import { findNode, parentOf } from './catalog.js';
 import { TREE_MIME } from './constants.js';
 import { pathInspector } from './pathInspector.js';
-import { folderTypeLabel } from './folderTypes.js';
 import type { CatalogStore } from './store.js';
 import { type NodeRef, isNodeRef } from './types.js';
 
@@ -112,13 +111,10 @@ export class ProjectTreeProvider implements vscode.TreeDataProvider<ProjectTreeI
             const item = new ProjectTreeItem(ref, located.module.name, vscode.TreeItemCollapsibleState.None);
             item.iconPath = new vscode.ThemeIcon('folder');
             const inspected = await pathInspector.inspect(located.module.path);
-            const kindLabel = folderTypeLabel(located.module.kind);
-            item.description = inspected.exists
-                ? kindLabel
-                : t("{0} · Path does not exist", kindLabel);
+            item.description = inspected.exists ? undefined : t("Missing");
             item.tooltip = tooltip(
                 located.module.name,
-                `${kindLabel}${inspected.git ? ' · Git' : ''}`,
+                inspected.git ? 'Git' : undefined,
                 located.module.path,
             );
             item.command = {

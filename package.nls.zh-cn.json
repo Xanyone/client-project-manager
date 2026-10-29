@@ -11,7 +11,6 @@
   "commands.addModule.title": "添加模块",
   "commands.rename.title": "重命名",
   "commands.setColor.title": "设置颜色",
-  "commands.setKind.title": "设置目录类型",
   "commands.setPath.title": "设置路径",
   "commands.setDescription.title": "设置说明",
   "commands.edit.title": "编辑",
@@ -37,8 +36,5 @@
   "settings.storage.settings": "保存在用户设置中，可随 Settings Sync 同步",
   "settings.storage.description": "分组数据的保存位置。",
   "settings.catalog.description": "当存储方式为 settings 时使用的分组数据。一般不用手改。",
-  "settings.showSidebar.description": "显示客户项目管理器侧栏。默认仅使用仪表盘。",
-  "commands.manageFolderTypes.title": "管理目录类型",
-  "settings.folderTypes.description": "常用自定义目录类型。创建自定义类型时自动保存到此列表；类型选项由内置类型和此列表组成。",
-  "settings.defaultFolderType.description": "添加目录时优先显示的内置或已配置自定义类型。使用“管理目录类型”选择；未配置的类型按“其他”处理。"
+  "settings.showSidebar.description": "显示客户项目管理器侧栏。默认仅使用仪表盘。"
 }

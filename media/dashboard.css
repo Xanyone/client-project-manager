@@ -521,7 +521,6 @@ button.ghost:active:not(:disabled) {
 .client-meta,
 .project-description,
 .project-count,
-.module-kind,
 .module-path {
     color: var(--muted);
     font-size: 12px;
@@ -625,19 +624,6 @@ button.ghost:active:not(:disabled) {
     gap: 6px;
     min-width: 0;
     padding: 16px;
-}
-
-.module-kind {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 2px 7px 2px 5px;
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--tone, var(--signal)) 16%, transparent);
-    font-size: 11px;
-    max-width: 100%;
-    min-width: 0;
-    overflow-wrap: anywhere;
 }
 
 .module-heading {

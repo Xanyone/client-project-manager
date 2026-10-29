@@ -9,7 +9,6 @@ import {
     type Located,
     type ModuleEntry,
     type ModuleInput,
-    type ModuleKind,
     type NamedInput,
     type NodeRef,
     type ProjectEntry,
@@ -125,7 +124,6 @@ export function addModule(
     const module: ModuleEntry = {
         id: randomUUID(),
         name: requireName(input.name),
-        kind: requireKind(input.kind),
         path: requirePath(input.path),
         color: normalizeColor(input.color),
         description: cleanText(input.description),
@@ -173,13 +171,6 @@ export function setModulePath(catalog: Catalog, ref: NodeRef, modulePath: string
     const parent = parentOf(catalog, ref);
     if (parent) { assertUniquePath(catalog, parent.id, path, ref.id); }
     return mapModule(catalog, ref, node => ({ ...node, path }));
-}
-
-export function setModuleKind(catalog: Catalog, ref: NodeRef, kind: ModuleKind): Catalog {
-    if (ref.type !== 'module') {
-        throw new Error(t("Only modules can have a type"));
-    }
-    return mapModule(catalog, ref, node => ({ ...node, kind: requireKind(kind) }));
 }
 
 export function removeNode(catalog: Catalog, ref: NodeRef): Catalog {
@@ -417,7 +408,6 @@ export function mergeCatalog(base: Catalog, incoming: Catalog): Catalog {
                 project.modules.push({
                     id: randomUUID(),
                     name: uniqueName(project.modules.map(module => module.name), incomingModule.name),
-                    kind: incomingModule.kind,
                     path: incomingModule.path,
                     color: incomingModule.color,
                     description: incomingModule.description,
@@ -471,7 +461,6 @@ function parseModule(input: unknown, seen: Set<string>): ModuleEntry {
     return {
         id: uniqueId(record.id, seen),
         name: requireName(typeof record.name === 'string' ? record.name : ''),
-        kind: requireKind(typeof record.kind === 'string' ? record.kind : ''),
         path: requirePath(typeof record.path === 'string' ? record.path : ''),
         color: normalizeColor(record.color),
         description: cleanText(typeof record.description === 'string' ? record.description : undefined),
@@ -529,14 +518,6 @@ function requirePath(modulePath: string): string {
 function cleanText(value: string | undefined): string | undefined {
     const trimmed = value?.trim();
     return trimmed ? trimmed : undefined;
-}
-
-function requireKind(kind: string): ModuleKind {
-    const trimmed = kind.trim();
-    if (!trimmed) {
-        throw new Error(t("Type cannot be empty"));
-    }
-    return trimmed;
 }
 
 function sameName(left: string, right: string): boolean {

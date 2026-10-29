@@ -1,5 +1,12 @@
 # Change Log
 
+## 0.4.5 — 2026-10-29
+
+- 移除目录类型及其筛选和管理功能，简化目录数据模型与操作流程。
+- 更新目录清单导入、导出、仪表盘和中英文使用说明以匹配新的数据模型。
+
+Folder types, filtering and management have been removed, simplifying the catalog model and workflows. Catalog import/export, the dashboard and bilingual documentation now reflect the updated model.
+
 ## 0.4.4 — 2026-10-28
 
 - 将 VS Code 扩展标识更新为 `Xanyone.client-project-manager`，与 GitHub 仓库名称保持一致。

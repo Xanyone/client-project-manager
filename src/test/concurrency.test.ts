@@ -147,7 +147,6 @@ suite('concurrent catalog transactions', () => {
         sandbox.stub(vscode.window, 'showOpenDialog').resolves([uri]);
         const input = sandbox.stub(vscode.window, 'showInputBox');
         input.onCall(0).resolves('API');
-        sandbox.stub(vscode.window, 'showQuickPick').resolves({ label: 'Backend', id: 'builtin:backend', action: 'select' } as vscode.QuickPickItem);
         const actions = new ProjectActions({} as vscode.ExtensionContext, store);
         await actions.addModule(projectId);
         assert.equal(store.get().clients[0].projects[0].modules[0].path, uri.toString());

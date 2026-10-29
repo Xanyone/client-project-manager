@@ -14,8 +14,6 @@ export const COMMANDS = {
     addModule: 'clientProjectDashboard.addModule',
     rename: 'clientProjectDashboard.rename',
     setColor: 'clientProjectDashboard.setColor',
-    setKind: 'clientProjectDashboard.setKind',
-    manageFolderTypes: 'clientProjectDashboard.manageFolderTypes',
     setPath: 'clientProjectDashboard.setPath',
     setDescription: 'clientProjectDashboard.setDescription',
     edit: 'clientProjectDashboard.edit',
@@ -41,7 +39,7 @@ export const COLOR_PRESETS: ReadonlyArray<{ label: Message; hex: string }> = [
     { label: "Purple", hex: '#c792ea' },
 ];
 
-export const DEFAULT_KIND_COLOR = '#8b9bb4';
+export const DEFAULT_MODULE_COLOR = '#8b9bb4';
 
 export function colorAt(index: number): string {
     const safeIndex = ((index % COLOR_PRESETS.length) + COLOR_PRESETS.length) % COLOR_PRESETS.length;

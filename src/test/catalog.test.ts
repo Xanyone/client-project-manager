@@ -13,7 +13,7 @@ import {
     relocate,
     removeNode,
 } from '../catalog.js';
-import { guessKind, uniqueName } from '../paths.js';
+import { uniqueName } from '../paths.js';
 
 suite('catalog', () => {
     test('rejects malformed nested arrays instead of erasing them', () => {
@@ -34,22 +34,16 @@ suite('catalog', () => {
         const projectB = addProject(client.catalog, client.client.id, { name: 'B项目' });
         const withFront = addModule(projectB.catalog, projectB.project.id, {
             name: 'front-end',
-            kind: 'frontend',
             path: 'D:/customers/a/b/front-end',
         });
         const withBack = addModule(withFront.catalog, projectB.project.id, {
             name: 'back-end',
-            kind: 'backend',
             path: 'D:/customers/a/b/back-end',
         });
         const projectC = addProject(withBack.catalog, client.client.id, { name: 'C项目' });
 
         assert.equal(projectC.catalog.clients.length, 1);
         assert.equal(projectC.catalog.clients[0].projects.length, 2);
-        assert.deepEqual(
-            projectC.catalog.clients[0].projects[0].modules.map(module => module.kind),
-            ['frontend', 'backend'],
-        );
         assert.equal(projectC.catalog.clients[0].color, '#4c8dff');
     });
 
@@ -111,7 +105,7 @@ suite('catalog', () => {
                         {
                             name: 'B项目',
                             modules: [
-                                { name: 'front-end', kind: 'frontend', path: 'D:/front' },
+                                { name: 'front-end', path: 'D:/front' },
                             ],
                         },
                     ],
@@ -120,25 +114,7 @@ suite('catalog', () => {
         });
         assert.equal(parsed.version, 1);
         assert.ok(parsed.clients[0].id);
-        assert.equal(parsed.clients[0].projects[0].modules[0].kind, 'frontend');
         assert.throws(() => parseCatalog({ version: 2, clients: [] }), /Unsupported catalog version|不支持的数据版本/);
-    });
-
-    test('accepts custom module kinds and rejects empty kinds', () => {
-        const parsed = parseCatalog({
-            clients: [{
-                name: '客户',
-                projects: [{
-                    name: '项目',
-                    modules: [{ name: '服务', kind: 'GraphQL API', path: 'D:/service' }],
-                }],
-            }],
-        });
-        assert.equal(parsed.clients[0].projects[0].modules[0].kind, 'GraphQL API');
-        assert.throws(() => parseCatalog({
-            clients: [{ name: '客户', projects: [{ name: '项目', modules: [{ name: '服务', kind: '  ', path: 'D:/service' }] }] }],
-        }), /Type cannot be empty|类型不能为空/);
-        assert.throws(() => addModule(emptyCatalog(), 'missing', { name: '服务', kind: '  ', path: 'D:/service' }), /Type cannot be empty|类型不能为空/);
     });
 
     test('merges same client and skips a duplicated module path', () => {
@@ -151,8 +127,8 @@ suite('catalog', () => {
                         {
                             name: 'B项目',
                             modules: [
-                                { name: 'front-end', kind: 'frontend', path: 'D:/customers/a/b/front-end' },
-                                { name: 'admin', kind: 'admin', path: 'D:/customers/a/b/admin' },
+                                { name: 'front-end', path: 'D:/customers/a/b/front-end' },
+                                { name: 'admin', path: 'D:/customers/a/b/admin' },
                             ],
                         },
                     ],
@@ -166,12 +142,10 @@ suite('catalog', () => {
         assert.equal(modules.filter(module => module.path.endsWith('front-end')).length, 1);
     });
 
-    test('detects sibling names and guesses module kinds', () => {
+    test('detects sibling names and generates unique names', () => {
         const seeded = seed();
         assert.equal(hasSiblingName(seeded.catalog, { type: 'project', id: seeded.projectB }, 'front-end'), true);
         assert.equal(hasSiblingName(seeded.catalog, { type: 'project', id: seeded.projectB }, 'docs'), false);
-        assert.equal(guessKind('shop-front-end'), 'frontend');
-        assert.equal(guessKind('order-backend'), 'backend');
         assert.equal(uniqueName(['front-end', 'front-end (2)'], 'front-end'), 'front-end (3)');
         assert.equal(normalizeColor('#abc'), '#aabbcc');
         assert.equal(normalizeColor('red'), undefined);
@@ -190,12 +164,10 @@ function seed() {
     const projectB = addProject(client.catalog, client.client.id, { name: 'B项目' });
     const front = addModule(projectB.catalog, projectB.project.id, {
         name: 'front-end',
-        kind: 'frontend',
         path: 'D:/customers/a/b/front-end',
     });
     const back = addModule(front.catalog, projectB.project.id, {
         name: 'back-end',
-        kind: 'backend',
         path: 'D:/customers/a/b/back-end',
     });
     const projectC = addProject(back.catalog, client.client.id, { name: 'C项目' });
