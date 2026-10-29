@@ -2,6 +2,13 @@ name: Release
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to publish
+        required: true
+        default: v0.4.5
+        type: string
 permissions:
   contents: write
 jobs:
@@ -20,4 +27,5 @@ jobs:
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create $env:GITHUB_REF_NAME *.vsix --title "Client Project Manager $env:GITHUB_REF_NAME" --notes-file RELEASE_NOTES.md --verify-tag
+          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+        run: gh release create $env:RELEASE_TAG *.vsix --title "Client Project Manager $env:RELEASE_TAG" --notes-file RELEASE_NOTES.md --verify-tag
