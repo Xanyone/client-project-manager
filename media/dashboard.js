@@ -217,7 +217,6 @@
         const heading = el('span', 'module-heading');
         heading.append(el('span', 'module-name', module.name));
         const tags = el('span', 'module-tags');
-        tags.append(tick(module.color));
         if (module.git) {
             tags.append(el('span', 'tag', 'Git'));
         }
@@ -335,15 +334,6 @@
 
     function roleTag(label) {
         return el('span', 'role-tag', label);
-    }
-
-    function tick(color) {
-        const node = el('span', 'tick');
-        node.setAttribute('aria-hidden', 'true');
-        if (color) {
-            node.style.background = safeColor(color);
-        }
-        return node;
     }
 
     function metric(value, label) {

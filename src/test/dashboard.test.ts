@@ -20,6 +20,7 @@ suite('dashboard interactions', () => {
             assert.equal(doc.querySelectorAll('[data-action=filter-kind]').length, 0);
             assert.equal(doc.querySelectorAll('[data-action=manage-types]').length, 0);
             assert.equal(doc.querySelector('.module-kind'), null);
+            assert.equal(doc.querySelector('.module-card .tick'), null);
         } finally { dom.window.close(); }
     });
 

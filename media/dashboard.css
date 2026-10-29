@@ -476,13 +476,6 @@ button.ghost:active:not(:disabled) {
     min-height: 42px;
 }
 
-.tick {
-    width: 8px;
-    height: 8px;
-    flex: none;
-    background: var(--tone, var(--signal));
-}
-
 .client-icon,
 .project-icon {
     flex: none;

@@ -1,5 +1,11 @@
 # Change Log
 
+## 0.4.6 — 2026-10-29
+
+- 移除仪表盘目录名称下方的方块色标，保留目录颜色的卡片视觉提示。
+
+Removed the square color swatch below folder names in the dashboard while retaining folder color accents on cards.
+
 ## 0.4.5 — 2026-10-29
 
 - 移除目录类型及其筛选和管理功能，简化目录数据模型与操作流程。
