@@ -16,6 +16,19 @@ interface WindowsState {
     openedWindows?: StoredWindow[];
 }
 
+function containsWorkspaceUri(value: unknown, workspace: vscode.Uri): boolean {
+    if (typeof value === 'string') {
+        if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(value)) { return false; }
+        try { return vscode.Uri.parse(value).toString() === workspace.toString(); }
+        catch { return false; }
+    }
+    if (Array.isArray(value)) { return value.some(item => containsWorkspaceUri(item, workspace)); }
+    if (value && typeof value === 'object') {
+        return Object.values(value).some(item => containsWorkspaceUri(item, workspace));
+    }
+    return false;
+}
+
 export function toUri(location: string): vscode.Uri {
     if (!isFilePath(location) && /^[a-z][a-z0-9+.-]*:/i.test(location)) {
         return vscode.Uri.parse(location);
@@ -174,12 +187,12 @@ async function cleanupWorkspaces(context: vscode.ExtensionContext, directory: vs
         const bytes = await vscode.workspace.fs.readFile(vscode.Uri.joinPath(context.globalStorageUri, '..', 'storage.json'));
         const state = JSON.parse(Buffer.from(bytes).toString('utf8')) as { windowsState?: WindowsState };
         if (!state.windowsState || !Array.isArray(state.windowsState.openedWindows)) { return; }
-        const active = JSON.stringify(state.windowsState);
+        const windowsState = state.windowsState;
         const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
         for (const [name, type] of await vscode.workspace.fs.readDirectory(directory)) {
             if (type !== vscode.FileType.File || !/-(?:[a-f0-9]{12,16}(?:-[a-f0-9-]{36})?|[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})\.code-workspace$/.test(name)) { continue; }
             const file = vscode.Uri.joinPath(directory, name);
-            if (active.includes(name) || vscode.workspace.workspaceFile?.toString() === file.toString()) { continue; }
+            if (containsWorkspaceUri(windowsState, file) || vscode.workspace.workspaceFile?.toString() === file.toString()) { continue; }
             const stat = await vscode.workspace.fs.stat(file);
             if (stat.mtime >= cutoff) { continue; }
             await removeRecent(file);

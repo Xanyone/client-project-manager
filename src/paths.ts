@@ -23,7 +23,8 @@ export function locationKey(location: string): string {
         return `file:${win32.normalize(value).replace(/[\\/]+$/, '').toLowerCase()}`;
     }
     if (/^[a-z][a-z0-9+.-]*:/i.test(value)) {
-        const uri = new URL(value);
+        // VS Code URIs serialize literal plus signs as %2B in authorities and paths.
+        const uri = new URL(value.replace(/%2b/ig, '+'));
         uri.pathname = posix.normalize(uri.pathname).replace(/\/+$/, '') || '/';
         return uri.toString();
     }

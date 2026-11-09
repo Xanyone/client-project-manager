@@ -1,7 +1,8 @@
-Client Project Manager v0.4.6
+Client Project Manager v0.4.7
 
-- 移除仪表盘目录名称下方的方块色标，保留目录颜色的卡片视觉提示。
+- 修复设置同步并发导致的目录数据覆盖，并统一远程路径 URI 比较。
+- 修复清理任务误删其他窗口仍在使用的工作区文件，去重损坏目录错误提示。
 
-Removed the square color swatch below folder names in the dashboard while retaining folder color accents on cards.
+Fixes catalog overwrites during concurrent settings sync, remote path URI comparison, cleanup of active workspace files, and repeated corrupt catalog warnings.
 
-完整 VS Code 测试、类型检查、ESLint 和 VSIX 生产打包已验证通过。
+Full VS Code tests, type checking, ESLint and production VSIX packaging passed.

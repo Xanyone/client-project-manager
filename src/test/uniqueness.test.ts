@@ -56,6 +56,8 @@ suite('catalog uniqueness', () => {
         assert.ok(sameLocation('file:///C:/Work/API', 'c:/work/api/'));
         assert.ok(sameLocation('\\\\server\\share\\api', 'file://server/share/api'));
         assert.ok(sameLocation('vscode-remote://ssh-remote+one/home/a/../api/', 'vscode-remote://ssh-remote+one/home/api'));
+        assert.ok(sameLocation('vscode-remote://ssh-remote+one/home/api', 'vscode-remote://ssh-remote%2Bone/home/api'));
+        assert.ok(sameLocation('vscode-remote://ssh-remote+one/home/a+b', 'vscode-remote://ssh-remote+one/home/a%2Bb'));
         assert.notEqual(locationKey('vscode-remote://ssh-remote+one/home/API'), locationKey('vscode-remote://ssh-remote+one/home/api'));
         assert.notEqual(locationKey('vscode-remote://ssh-remote+one/home/api'), locationKey('vscode-remote://ssh-remote+two/home/api'));
         assert.ok(!sameLocation('/home/API', '/home/api'));

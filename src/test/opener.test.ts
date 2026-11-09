@@ -63,7 +63,7 @@ suite('workspace opening', () => {
             const stale = join(workspaces, 'old-123456789abc.code-workspace');
             const staleNewWindow = join(workspaces, 'old-01234567-89ab-4cde-8fab-0123456789ab.code-workspace');
             const recentNewWindow = join(workspaces, 'recent-01234567-89ab-4cde-8fab-0123456789ab.code-workspace');
-            const active = join(workspaces, 'active-123456789abc.code-workspace');
+            const active = join(workspaces, 'My Project-客户-123456789abc.code-workspace');
             const custom = join(workspaces, 'manual.code-workspace');
             for (const file of [stale, staleNewWindow, active, custom]) { await writeFile(file, '{}'); await utimes(file, 1, 1); }
             await writeFile(recentNewWindow, '{}');

@@ -127,4 +127,38 @@ suite('catalog storage', () => {
         assert.deepEqual(JSON.parse(await store.backup()), original);
         assert.equal(await store.update(emptyCatalog()), false);
     });
+
+    test('reads the latest settings value when queued configuration events are processed', async () => {
+        store.dispose();
+        mode = 'settings';
+        settings = addClient(emptyCatalog(), { name: 'Initial' }).catalog;
+        store = createStore();
+        await store.update(current => current);
+
+        settings = addClient(emptyCatalog(), { name: 'First external update' }).catalog;
+        change({ affectsConfiguration: key => key === `${CONFIG_SECTION}.catalog` } as vscode.ConfigurationChangeEvent);
+        const latest = addClient(emptyCatalog(), { name: 'Latest external update' }).catalog;
+        settings = latest;
+        change({ affectsConfiguration: key => key === `${CONFIG_SECTION}.catalog` } as vscode.ConfigurationChangeEvent);
+
+        await store.backup();
+        assert.deepEqual(store.get(), latest);
+    });
+
+    test('shows a corrupt catalog warning once until the stored value is repaired', () => {
+        store.dispose();
+        values.set(GLOBAL_STATE_KEY, { version: 999 });
+        const showError = vscode.window.showErrorMessage as sinon.SinonStub;
+        store = createStore();
+        const initialCount = showError.callCount;
+        store.reload();
+        store.reload();
+        assert.equal(showError.callCount, initialCount);
+
+        values.set(GLOBAL_STATE_KEY, emptyCatalog());
+        store.reload();
+        values.set(GLOBAL_STATE_KEY, { version: 999 });
+        store.reload();
+        assert.equal(showError.callCount, initialCount + 1);
+    });
 });

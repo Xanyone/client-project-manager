@@ -20,6 +20,7 @@ export class CatalogStore implements vscode.Disposable {
     private assertOwned: () => void = () => undefined;
     private disposed = false;
     private polling = false;
+    private readonly reportedErrors = new Set<string>();
     private readonly emitter = new vscode.EventEmitter<Catalog>();
     private readonly configurationListener: vscode.Disposable;
 
@@ -38,10 +39,10 @@ export class CatalogStore implements vscode.Disposable {
                     void vscode.window.showErrorMessage(t("Failed to switch storage: {0}", String(error)));
                 });
             } else if (!this.saving && event.affectsConfiguration(`${CONFIG_SECTION}.catalog`)) {
-                const baseline = JSON.stringify(this.catalog);
-                const incoming = this.readSettings();
                 void this.enqueue(() => this.withLock(async () => {
                     await this.refreshSnapshot();
+                    const baseline = JSON.stringify(this.catalog);
+                    const incoming = this.readSettings();
                     if (this.storageMode === 'settings' && baseline === JSON.stringify(this.catalog)) {
                         if (incoming.status === 'corrupt') { this.protect = true; return; }
                         const catalog = incoming.status === 'ok' ? incoming.catalog : emptyCatalog();
@@ -272,7 +273,7 @@ export class CatalogStore implements vscode.Disposable {
 
     private report(error: unknown): void {
         if (this.disposed) { return; }
-        void vscode.window.showErrorMessage(t("Unable to read catalog from {0}: {1}", t("Local storage"), String(error)));
+        this.notifyError(t("Unable to read catalog from {0}: {1}", t("Local storage"), String(error)));
     }
 
     private mode(): StorageMode {
@@ -293,12 +294,20 @@ export class CatalogStore implements vscode.Disposable {
             return { status: 'empty' };
         }
         try {
-            return { status: 'ok', catalog: parseCatalog(value) };
+            const catalog = parseCatalog(value);
+            this.reportedErrors.delete(source);
+            return { status: 'ok', catalog };
         } catch (error) {
             const message = error instanceof Error ? error.message : t("Unable to read data");
-            void vscode.window.showErrorMessage(t("Unable to read catalog from {0}: {1}", source, message));
+            this.notifyError(t("Unable to read catalog from {0}: {1}", source, message), source);
             return { status: 'corrupt' };
         }
+    }
+
+    private notifyError(message: string, key = message): void {
+        if (this.reportedErrors.has(key)) { return; }
+        this.reportedErrors.add(key);
+        void vscode.window.showErrorMessage(message);
     }
 }
 

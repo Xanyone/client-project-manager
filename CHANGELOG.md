@@ -1,5 +1,14 @@
 # Change Log
 
+## 0.4.7 — 2026-11-09
+
+- 修复设置存储并发同步可能覆盖较新目录的问题。
+- 统一远程 URI 中 `+` 与 `%2B` 的路径比较，避免重复添加同一目录。
+- 修复工作区清理误删其他窗口中仍在使用的空格或中文名称工作区文件。
+- 去重损坏目录的重复错误提示，并在数据修复后恢复告警。
+
+Fixes concurrent settings synchronization, remote URI deduplication and cleanup of active generated workspaces with spaces or non-ASCII names. Corrupt catalog warnings are now deduplicated and can be shown again after repair.
+
 ## 0.4.6 — 2026-10-29
 
 - 移除仪表盘目录名称下方的方块色标，保留目录颜色的卡片视觉提示。
