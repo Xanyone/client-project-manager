@@ -1,7 +1,7 @@
 import { t } from './i18n.js';
 import { createHash, randomUUID } from 'node:crypto';
 import * as vscode from 'vscode';
-import { isFilePath, locationKey, safeFileName, sameLocation, uniqueName } from './paths.js';
+import { isFilePath, locationKey, safeFileName, uniqueName } from './paths.js';
 import { deduplicateFolders } from './catalog.js';
 import type { FolderLocation } from './types.js';
 
@@ -61,10 +61,7 @@ export async function openFolders(
     }
 
     const single = available.length === 1 ? available[0] : undefined;
-    const alreadyOpen = single !== undefined && newWindow
-        ? await isFolderWindowOpen(context, single.location)
-        : false;
-    if (single && !alreadyOpen) {
+    if (single) {
         await openUri(toUri(single.location), newWindow);
         return;
     }
@@ -134,33 +131,6 @@ async function rememberFolders(folders: readonly FolderLocation[]): Promise<void
 async function removeRecent(file: vscode.Uri): Promise<void> {
     try { await vscode.commands.executeCommand('vscode.removeFromRecentlyOpened', file); }
     catch { /* Optional recent-list maintenance must not block opening. */ }
-}
-
-async function isFolderWindowOpen(context: vscode.ExtensionContext, location: string): Promise<boolean> {
-    try {
-        const storage = vscode.Uri.joinPath(context.globalStorageUri, '..', 'storage.json');
-        const bytes = await vscode.workspace.fs.readFile(storage);
-        const json = JSON.parse(Buffer.from(bytes).toString('utf8')) as { windowsState?: WindowsState };
-        const state = json.windowsState;
-        if (!state) {
-            return false;
-        }
-        const windows = [
-            state.lastActiveWindow,
-            state.lastPluginDevelopmentHostWindow,
-            ...(state.openedWindows ?? []),
-        ];
-        return windows.some(win => {
-            const folder = win?.folder ?? win?.folderUri;
-            return typeof folder === 'string' && sameFolder(folder, location);
-        });
-    } catch {
-        return false;
-    }
-}
-
-function sameFolder(stored: string, location: string): boolean {
-    try { return sameLocation(stored, location); } catch { return false; }
 }
 
 function toWorkspaceFolder(name: string, location: string): { name: string; path?: string; uri?: string } {

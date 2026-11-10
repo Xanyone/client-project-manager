@@ -1,5 +1,11 @@
 # Change Log
 
+## 0.4.8 — 2026-11-10
+
+- 单目录打开到新窗口时直接打开文件夹，不再生成临时工作区文件。
+
+Opening a single folder in a new window now opens the folder directly instead of creating a temporary workspace file.
+
 ## 0.4.7 — 2026-11-09
 
 - 修复设置存储并发同步可能覆盖较新目录的问题。

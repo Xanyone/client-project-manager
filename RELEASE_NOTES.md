@@ -1,8 +1,7 @@
-Client Project Manager v0.4.7
+Client Project Manager v0.4.8
 
-- 修复设置同步并发导致的目录数据覆盖，并统一远程路径 URI 比较。
-- 修复清理任务误删其他窗口仍在使用的工作区文件，去重损坏目录错误提示。
+- 单目录打开到新窗口时直接打开文件夹，不再生成临时工作区文件。
 
-Fixes catalog overwrites during concurrent settings sync, remote path URI comparison, cleanup of active workspace files, and repeated corrupt catalog warnings.
+Opening a single folder in a new window now opens the folder directly instead of creating a temporary workspace file.
 
 Full VS Code tests, type checking, ESLint and production VSIX packaging passed.

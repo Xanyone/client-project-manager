@@ -35,6 +35,19 @@ suite('workspace opening', () => {
         assert.equal((await pathInspector.inspect(__filename)).exists, false);
     });
 
+    test('opens a single folder directly in a new window', async () => {
+        const sandbox = sinon.createSandbox();
+        const directory = await mkdtemp(join(tmpdir(), 'client-project-manager-single-'));
+        try {
+            const execute = sandbox.stub(vscode.commands, 'executeCommand').resolves();
+            const context = { globalStorageUri: vscode.Uri.file(directory) } as vscode.ExtensionContext;
+            await openFolders(context, 'Project', [{ name: 'Project', location: 'C:/work/project' }], true);
+            const call = execute.getCalls().find(item => item.args[0] === 'vscode.openFolder')!;
+            assert.equal((call.args[1] as vscode.Uri).fsPath, 'c:\\work\\project');
+            assert.equal((call.args[2] as { forceNewWindow: boolean }).forceNewWindow, true);
+        } finally { sandbox.restore(); await rm(directory, { recursive: true, force: true }); }
+    });
+
     test('deduplicates folders and tolerates unavailable recent-list commands', async () => {
         const sandbox = sinon.createSandbox();
         const directory = await mkdtemp(join(tmpdir(), 'client-project-manager-open-'));

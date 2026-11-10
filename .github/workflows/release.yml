@@ -7,7 +7,7 @@ on:
       tag:
         description: Release tag to publish
         required: true
-        default: v0.4.7
+        default: v0.4.8
         type: string
 permissions:
   contents: write
